@@ -1,1 +1,1 @@
-# Scotlant-Yard-Coursework
+# Scotland-Yard-Coursework
