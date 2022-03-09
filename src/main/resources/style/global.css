@@ -1,0 +1,178 @@
+/*Main*/
+.root {
+    -fx-base: rgb(50, 50, 50);
+    -fx-background: rgb(50, 50, 50);
+    -fx-color: derive(-fx-base, 10%);
+    -fx-control-inner-background: rgb(20, 20, 20);
+    -fx-control-inner-background-alt: derive(-fx-control-inner-background, 2.5%);
+    -fx-light-text-color: rgb(220, 220, 220);
+    -fx-mid-text-color: rgb(100, 100, 100);
+    -fx-dark-text-color: rgb(20, 20, 20);
+    -fx-accent: #bf2f38;
+    -fx-selection-bar-non-focused: rgb(50, 50, 50);
+    -fx-font-size: 1.12em;
+}
+
+.text-input {
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, +50%);
+}
+
+.text-input:focused {
+    -fx-prompt-text-fill: transparent;
+}
+
+.scroll-bar > .increment-button > .increment-arrow,
+.scroll-bar > .decrement-button > .decrement-arrow {
+    -fx-background-color: -fx-mark-highlight-color, rgb(220, 220, 220);
+}
+
+.scroll-bar > .increment-button:hover > .increment-arrow,
+.scroll-bar > .decrement-button:hover > .decrement-arrow {
+    -fx-background-color: -fx-mark-highlight-color, rgb(240, 240, 240);
+}
+
+.scroll-bar > .increment-button:pressed > .increment-arrow,
+.scroll-bar > .decrement-button:pressed > .decrement-arrow {
+    -fx-background-color: -fx-mark-highlight-color, rgb(255, 255, 255);
+}
+
+.menu-bar {
+    -fx-background-color: rgb(48, 48, 48);
+    -fx-effect: dropshadow(one-pass-box, black, 10, 0.3, 0, 0);
+}
+
+/*Game*/
+
+#main-window {
+    -fx-background-image: url("../wood_pattern.png");
+    -fx-background-repeat: repeat;
+}
+
+/*Travel log*/
+
+#rounds {
+    -fx-background-color: #2a2a2a;
+    /*-fx-padding: 10;*/
+    /*-fx-background-radius: 10;*/
+    -fx-effect: dropshadow(one-pass-box, black, 10, 0.3, 0, 0);
+}
+
+#rounds #title {
+    -fx-padding: 8;
+    -fx-font-size: 1.1em;
+    -fx-text-fill: white;
+}
+
+#rounds .table-view {
+    -fx-background-color: transparent;
+    -fx-table-cell-border-color: transparent;
+    -fx-light-text-color: white;
+    -fx-mid-text-color: #ffffff;
+    -fx-dark-text-color: #ffffff;
+    -fx-text-alignment: center;
+    -fx-fixed-cell-size: 40px;
+}
+
+#rounds .table-view *.table-column {
+    -fx-alignment: CENTER-RIGHT;
+}
+
+#rounds .table-view *.column-header {
+    -fx-background-color: transparent;
+}
+
+#rounds .table-view *.column-header-background {
+    -fx-background-color: transparent;
+}
+
+#rounds .table-view .filler {
+    -fx-background-color: transparent;
+}
+
+#rounds .table-view *.table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent white transparent;
+
+}
+
+#players {
+    -fx-background-color: #2a2a2a;
+    -fx-effect: dropshadow(one-pass-box, black, 10, 0.3, 0, 0);
+}
+
+#players #title {
+    -fx-font-size: 1.1em;
+}
+
+.player {
+    -fx-padding: 0 10 10 10px;
+}
+
+.player {
+    -fx-effect: dropshadow(one-pass-box, black, -4, 0.3, 0, 0);
+}
+
+#controlContainer {
+    -fx-background-color: transparent;
+}
+
+.move-hint {
+    -fx-stroke-type: outside;
+    -fx-fill: transparent;
+    -fx-stroke-width: 10px;
+    -fx-stroke: #b8ff61;
+    -fx-opacity: 0.8;
+    -fx-effect: dropshadow(one-pass-box, black, 10, 0.5, 0, 0);
+}
+
+.highlighted {
+    -fx-stroke: #ffec1a;
+}
+
+.counter {
+    -fx-stroke-type: outside;
+    -fx-stroke-width: 8px;
+    -fx-stroke: #f9fcff;
+}
+
+.log-round {
+    -fx-background-color: #3c3c3c;
+    -fx-padding: 5 2 5 2;
+}
+
+.log-text {
+    /*-fx-border-color: white;*/
+    /*-fx-border-radius: 8;*/
+    /*-fx-border-width: 4;*/
+    -fx-padding: 4;
+    -fx-text-fill: white;
+    -fx-font-size: 1.5em;
+    -fx-font-family: monospace;
+}
+
+.ticket-counter {
+    /*-fx-border-width: 1px;*/
+    /*-fx-border-color: white;*/
+    -fx-text-fill: white;
+    /*-fx-font-size: 0.85em;*/
+}
+
+.ticket-counter-text {
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 10, 0.3, 0, 0);
+}
+
+.notification {
+    -fx-background-color: rgb(48, 48, 48);
+    -fx-padding: 10 40 10 40;
+    -fx-background-radius: 0 0 10 10;
+    -fx-effect: dropshadow(one-pass-box, black, 10, 0.3, 0, 0);
+}
+
+#rainbow {
+    -fx-stroke: linear-gradient(to bottom, #ff0000 0%, #ff0000 33%, #00ff00 33%, #00ff00 66%, #0000ff 66%, #0000ff 100%);
+    -fx-stroke-width: 20px;
+}
+
+.move-menu {
+    -fx-background-color: rgba(0, 0, 0, 0.59);
+}

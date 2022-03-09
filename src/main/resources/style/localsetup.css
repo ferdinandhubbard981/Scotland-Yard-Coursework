@@ -1,0 +1,22 @@
+
+#root {
+    -fx-background-color: #2a2a2a;
+    -fx-padding: 15px;
+    -fx-border-color: white;
+    -fx-border-width: 2px;
+}
+
+
+.split-pane {
+    -fx-background-color: transparent;
+}
+
+
+*.split-pane-divider,
+*.vertical-grabber,
+*.horizontal-grabber {
+    -fx-background-color: null;
+    -fx-border-color: null;
+    -fx-padding: 0;
+}
+
