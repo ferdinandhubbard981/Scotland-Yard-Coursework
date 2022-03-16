@@ -23,11 +23,11 @@ import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
 public final class MyGameStateFactory implements Factory<GameState> {
 
 	@Nonnull @Override public GameState build(
-			GameSetup setup,
-			Player mrX,
-			ImmutableList<Player> detectives){
-		return new MyGameState(setup, ImmutableSet.of(mrX.piece()), ImmutableList.of(), mrX, detectives);
-	  }
+		GameSetup setup,
+		Player mrX,
+		ImmutableList<Player> detectives){
+			return new MyGameState(setup, ImmutableSet.of(mrX.piece()), ImmutableList.of(), mrX, detectives);
+	}
 
 		
 	private final class MyGameState implements GameState {
@@ -40,36 +40,41 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		private ImmutableSet<Piece> winner;
 		
 		//constructor that gets called by the build function in MyGameStateFactory
-		private MyGameState(final GameSetup setup, final ImmutableSet<Piece> remaining, final ImmutableList<LogEntry> log, final Player mrX, final List<Player> detectives){	
-		this.setup = setup;
-		this.remaining = remaining;
-		this.log = log;
-		this.mrX = mrX;
-		this.detectives = detectives;
+		private MyGameState(
+			final GameSetup setup, 
+			final ImmutableSet<Piece> remaining, 
+			final ImmutableList<LogEntry> log, 
+			final Player mrX, 
+			final List<Player> detectives){	
+				this.setup = setup;
+				this.remaining = remaining;
+				this.log = log;
+				this.mrX = mrX;
+				this.detectives = detectives;
 		
-			//checking for null inputs
-			if (mrX == null) throw new NullPointerException();
-			if (detectives == null) throw new NullPointerException();
-			if (detectives.contains(null)) throw new NullPointerException();
+				//checking for null inputs
+				if (mrX == null) throw new NullPointerException();
+				if (detectives == null) throw new NullPointerException();
+				if (detectives.contains(null)) throw new NullPointerException();
 	
-			//check detectives have 0 x2 & secret tickets 
-			detectives.forEach((det) -> {
-				if (det.has(Ticket.DOUBLE)) throw new IllegalArgumentException();
-				if (det.has(Ticket.SECRET)) throw new IllegalArgumentException();
-			});
+				//check detectives have 0 x2 & secret tickets 
+				detectives.forEach((det) -> {
+					if (det.has(Ticket.DOUBLE)) throw new IllegalArgumentException();
+					if (det.has(Ticket.SECRET)) throw new IllegalArgumentException();
+				});
 			
-			//check no duplicate detectives (colour)
-			HashMap<String, Boolean> found = new HashMap<>();
-			for (int i = 0; i < detectives.size(); i++) {
-				String colour = detectives.get(i).piece().webColour();
-				if (found.containsKey(colour)) throw new IllegalArgumentException();
-				found.put(colour, true);
-			}
+				//check no duplicate detectives (colour)
+				HashMap<String, Boolean> found = new HashMap<>();
+				for (int i = 0; i < detectives.size(); i++) {
+					String colour = detectives.get(i).piece().webColour();
+					if (found.containsKey(colour)) throw new IllegalArgumentException();
+					found.put(colour, true);
+				}
 			
-			//check empty graph
-			if(setup.graph.nodes().size() == 0) throw new IllegalArgumentException();
-			//check empty moves
-			if(setup.moves.isEmpty()) throw new IllegalArgumentException();
+				//check empty graph
+				if(setup.graph.nodes().size() == 0) throw new IllegalArgumentException();
+				//check empty moves
+				if(setup.moves.isEmpty()) throw new IllegalArgumentException();
 			
 		}
 
@@ -94,8 +99,8 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			String colour = detective.webColour();
 			//find detective in list with matching colour
 			return detectives.stream()
-			.filter(x -> x.piece().webColour() == colour)
-			.map(x -> x.location()).findFirst();
+				.filter(x -> x.piece().webColour() == colour)
+				.map(x -> x.location()).findFirst();
 		}
 
 		@Override
