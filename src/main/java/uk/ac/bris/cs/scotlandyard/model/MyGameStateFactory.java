@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
@@ -23,38 +24,50 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 	@Nonnull @Override public GameState build(
 			GameSetup setup,
-			Player mrX,
-			ImmutableList<Player> detectives) {
-		//checking for null inputs
-		if (mrX == null) throw new NullPointerException();
-		if (detectives == null) throw new NullPointerException();
-		if (detectives.contains(null)) throw new NullPointerException();
-		//end 
-
-		//check detectives have 0 x2 & secret tickets 
-		detectives.forEach((det) -> {
-			if (det.has(Ticket.DOUBLE)) throw new IllegalArgumentException();
-			if (det.has(Ticket.SECRET)) throw new IllegalArgumentException();
-		});
-		//end
-		
-		//check no duplicate detectives (colour)
-		HashMap<String, Boolean> found = new HashMap<>();
-		for (int i = 0; i < detectives.size(); i++) {
-			String colour = detectives.get(i).piece().webColour();
-			if (found.containsKey(colour)) throw new IllegalArgumentException();
-			found.put(colour, true);
-		}
-		//end
-		
-		//check empty graph & empty moves
-		if(setup.graph.nodes().size() == 0) throw new IllegalArgumentException();
-		if(setup.moves.size() == 0) throw new IllegalArgumentException();
-		//end
-
+			Player MrX,
+			ImmutableList<Player> detectives){
+		return new MyGameState(setup, ImmutableSet.of(MrX.piece()), ImmutableList.of(), MrX, detectives);
+	  }
 
 		
-		return new GameState() {
+		private final class MyGameState implements GameState {
+			private GameSetup setup;
+			private ImmutableSet<Piece> remaining;
+			private ImmutableList<LogEntry> log;
+			private Player mrX;
+			private List<Player> detectives;
+			private ImmutableSet<Move> moves;
+			private ImmutableSet<Piece> winner;
+
+			private MyGameState(final GameSetup setup, final ImmutableSet<Piece> remaining, final ImmutableList<LogEntry> log, final Player mrX, final List<Player> detectives){	
+			
+				//checking for null inputs
+				if (mrX == null) throw new NullPointerException();
+				if (detectives == null) throw new NullPointerException();
+				if (detectives.contains(null)) throw new NullPointerException();
+				//end 
+		
+				//check detectives have 0 x2 & secret tickets 
+				detectives.forEach((det) -> {
+					if (det.has(Ticket.DOUBLE)) throw new IllegalArgumentException();
+					if (det.has(Ticket.SECRET)) throw new IllegalArgumentException();
+				});
+				//end
+				
+				//check no duplicate detectives (colour)
+				HashMap<String, Boolean> found = new HashMap<>();
+				for (int i = 0; i < detectives.size(); i++) {
+					String colour = detectives.get(i).piece().webColour();
+					if (found.containsKey(colour)) throw new IllegalArgumentException();
+					found.put(colour, true);
+				}
+				//end
+				
+				//check empty graph & empty moves
+				if(setup.graph.nodes().size() == 0) throw new IllegalArgumentException();
+				if(setup.moves.size() == 0) throw new IllegalArgumentException();
+				//end
+			}
 
 			@Override
 			public GameSetup getSetup() {
@@ -81,7 +94,13 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 			@Override
 			public Optional<TicketBoard> getPlayerTickets(Piece piece) {
-				// TODO Auto-generated method stub
+				String colour = piece.webColour();
+				//check for mrx
+				
+				//check for detectives
+				// detectives.stream()
+				// .filter(x -> x.piece().webColour() == colour)
+				// .map(x -> x.)
 				return null;
 			}
 
@@ -113,5 +132,5 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		//throw new RuntimeException("Implement me!");
 		
-	}
+	
 }
