@@ -52,17 +52,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		if(setup.moves.size() == 0) throw new IllegalArgumentException();
 		//end
 
-		//check detective locations match supplied
-		for(Player detective : detectives){
-			//if (detective.location() != setup.graph)
-		}
-		//end
-
-
-
-
-
-
 
 		
 		return new GameState() {
@@ -83,7 +72,11 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			public Optional<Integer> getDetectiveLocation(Detective detective) {
 				// TODO Auto-generated method stub
 				
-				return null;
+				String colour = detective.webColour();
+				//find detective in list with matching colour
+				return detectives.stream()
+				.filter(x -> x.piece().webColour() == colour)
+				.map(x -> x.location()).findFirst();
 			}
 
 			@Override
