@@ -102,8 +102,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public Optional<Integer> getDetectiveLocation(Detective detective) {
-			// TODO Auto-generated method stub
-			
 			String colour = detective.webColour();
 			//find detective in list with matching colour
 			return detectives.stream()
