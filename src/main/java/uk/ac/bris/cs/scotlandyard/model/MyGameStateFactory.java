@@ -1,6 +1,7 @@
 package uk.ac.bris.cs.scotlandyard.model;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Arrays;
@@ -105,15 +106,26 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public Optional<TicketBoard> getPlayerTickets(Piece piece) {
-
+			//check getPlayerTicketsForNonExistentPlayerIsEmpty
+			ImmutableList<Player> allPlayers = ImmutableList.<Player>builder()
+				.addAll(this.detectives)
+				.add(this.mrX)
+				.build();
 			String colour = piece.webColour();
-			//check for mrx
-			
-			//check for detectives
-			// detectives.stream()
-			// .filter(x -> x.piece().webColour() == colour)
-			// .map(x -> x.)
-			return null;
+			Optional<Player> referencedPlayer = allPlayers.stream()
+				.filter(player -> player.piece().webColour().equals(colour))
+				.findFirst();
+
+			if(referencedPlayer.isEmpty()) return Optional.empty();
+			//END
+			//for valid players 
+			return Optional.of(new TicketBoard(){
+				@Override
+				public int getCount(Ticket ticket) {
+					return referencedPlayer.get().tickets().get(ticket);
+				}
+			});
+			//END
 		}
 
 		@Override
