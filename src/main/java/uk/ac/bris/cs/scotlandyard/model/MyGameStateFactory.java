@@ -162,7 +162,20 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public ImmutableSet<Move> getAvailableMoves() {
-			// TODO Auto-generated method stub
+			//winner is defined, then return empty moves list
+			/*
+			if (!this.winner.isEmpty()) {
+				this.moves = ImmutableSet.<Move>builder().build();
+				return this.moves;
+			}
+			//mrX can make both double and single moves
+			this.getPlayerTickets(piece)
+			for (Player player : players){
+				//if mrX then calculate double moves
+				//calculate player single moves
+				//create instances of moves (taxi, bus, underground)
+				//update and remove
+			}		*/
 			return null;
 		}
 
