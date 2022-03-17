@@ -5,9 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.List;
 
@@ -48,43 +50,45 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			final ImmutableList<LogEntry> log, 
 			final Player mrX, 
 			final ImmutableList<Player> detectives){
-				this.setup = setup;
-				this.remaining = remaining;
-				this.log = log;
-				this.mrX = mrX;
-				this.detectives = detectives;
-		
-				//checking for null inputs
-				if (mrX == null) throw new NullPointerException();
-				if (detectives == null) throw new NullPointerException();
-				if (detectives.contains(null)) throw new NullPointerException();
-	
-				//check detectives have 0 x2 & secret tickets 
-				detectives.forEach((det) -> {
-					if (det.has(Ticket.DOUBLE)) throw new IllegalArgumentException();
-					if (det.has(Ticket.SECRET)) throw new IllegalArgumentException();
-				});
-			
-				//check no duplicate detectives (colour)
-				HashMap<String, Boolean> found = new HashMap<>();
-				for (int i = 0; i < detectives.size(); i++) {
-					String colour = detectives.get(i).piece().webColour();
-					if (found.containsKey(colour)) throw new IllegalArgumentException();
-					found.put(colour, true);
-				}
-			
-				//check empty graph
-				if(setup.graph.nodes().size() == 0) throw new IllegalArgumentException();
-				//check empty moves
-				if(setup.moves.isEmpty()) throw new IllegalArgumentException();
 
-				//check detective location overlaps test: testLocationOverlapBetweenDetectivesShouldThrow
-				//Don't know how to do this efficiently in streams
-				for (int i = 0; i < detectives.size()-1; i++) {
-					for (int j = i + 1; j < detectives.size(); j++) {
-						if (detectives.get(i).location() == detectives.get(j).location()) throw new IllegalArgumentException();
-					}
+			this.setup = setup;
+			this.remaining = remaining;
+			this.log = log;
+			this.mrX = mrX;
+			this.detectives = detectives;
+			this.winner = ImmutableSet.of();
+
+			//checking for null inputs
+			if (mrX == null) throw new NullPointerException();
+			if (detectives == null) throw new NullPointerException();
+			if (detectives.contains(null)) throw new NullPointerException();
+
+			//check detectives have 0 x2 & secret tickets 
+			detectives.forEach((det) -> {
+				if (det.has(Ticket.DOUBLE)) throw new IllegalArgumentException();
+				if (det.has(Ticket.SECRET)) throw new IllegalArgumentException();
+			});
+		
+			//check no duplicate detectives (colour)
+			HashMap<String, Boolean> found = new HashMap<>();
+			for (int i = 0; i < detectives.size(); i++) {
+				String colour = detectives.get(i).piece().webColour();
+				if (found.containsKey(colour)) throw new IllegalArgumentException();
+				found.put(colour, true);
+			}
+		
+			//check empty graph
+			if(setup.graph.nodes().size() == 0) throw new IllegalArgumentException();
+			//check empty moves
+			if(setup.moves.isEmpty()) throw new IllegalArgumentException();
+
+			//check detective location overlaps test: testLocationOverlapBetweenDetectivesShouldThrow
+			//Don't know how to do this efficiently in streams
+			for (int i = 0; i < detectives.size()-1; i++) {
+				for (int j = i + 1; j < detectives.size(); j++) {
+					if (detectives.get(i).location() == detectives.get(j).location()) throw new IllegalArgumentException();
 				}
+			}
 			
 		}
 
@@ -149,8 +153,12 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public ImmutableSet<Piece> getWinner() {
-			// TODO Auto-generated method stub
-			return null;
+			return winner;
+			
+			//check if any detective location == mrx location
+
+			//check if mrxs travel log count == max number of moves
+			// if (log.size() == setup.moves.size()) return new ImmutableSet<
 		}
 
 		@Override
