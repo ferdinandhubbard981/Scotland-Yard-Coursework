@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -89,8 +90,14 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public ImmutableSet<Piece> getPlayers() {
-			// TODO Auto-generated method stub
-			return null;
+			//check getPlayersMatchesSupplied
+			return ImmutableSet.<Piece>builder()
+				.add(this.mrX.piece())
+				.addAll(this.detectives.stream()
+					.map(detective -> detective.piece())
+					.collect(Collectors.toList()))
+				.build();
+			//END
 		}
 
 		@Override
