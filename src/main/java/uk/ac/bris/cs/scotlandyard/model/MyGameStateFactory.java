@@ -47,7 +47,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			final ImmutableSet<Piece> remaining, 
 			final ImmutableList<LogEntry> log, 
 			final Player mrX, 
-			final List<Player> detectives){	
+			final List<Player> detectives){	//need to change to immutable list
 				this.setup = setup;
 				this.remaining = remaining;
 				this.log = log;
@@ -77,6 +77,14 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				if(setup.graph.nodes().size() == 0) throw new IllegalArgumentException();
 				//check empty moves
 				if(setup.moves.isEmpty()) throw new IllegalArgumentException();
+
+				//check detective location overlaps test: testLocationOverlapBetweenDetectivesShouldThrow
+				//Don't know how to do this efficiently in streams
+				for (int i = 0; i < detectives.size()-1; i++) {
+					for (int j = i + 1; j < detectives.size(); j++) {
+						if (detectives.get(i).location() == detectives.get(j).location()) throw new IllegalArgumentException();
+					}
+				}
 			
 		}
 
