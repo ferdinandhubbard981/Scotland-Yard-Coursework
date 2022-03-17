@@ -83,11 +83,10 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			if(setup.moves.isEmpty()) throw new IllegalArgumentException();
 
 			//check detective location overlaps test: testLocationOverlapBetweenDetectivesShouldThrow
-			//Don't know how to do this efficiently in streams
-			for (int i = 0; i < detectives.size()-1; i++) {
-				for (int j = i + 1; j < detectives.size(); j++) {
-					if (detectives.get(i).location() == detectives.get(j).location()) throw new IllegalArgumentException();
-				}
+			HashMap<Integer, String> locations = new HashMap<>();
+			for (Player detective : detectives){
+				if(locations.get(detective.location()) != null) throw new IllegalArgumentException();
+				locations.put(detective.location(), detective.piece().webColour());
 			}
 			
 		}
