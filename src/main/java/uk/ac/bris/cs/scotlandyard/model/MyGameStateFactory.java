@@ -95,8 +95,8 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public GameSetup getSetup() {
-			// TODO Auto-generated method stub
-			return null;
+			//implemented getSetup
+			return this.setup;
 		}
 
 		@Override
@@ -146,8 +146,8 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public ImmutableList<LogEntry> getMrXTravelLog() {
-			// TODO Auto-generated method stub
-			return null;
+			//implemented get log
+			return this.log;
 		}
 
 		@Override
