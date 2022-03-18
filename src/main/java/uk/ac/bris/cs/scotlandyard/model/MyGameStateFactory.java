@@ -143,7 +143,15 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				Set<Ticket> availableTickets = Stream.of(Ticket.values())
 					.filter(ticketType -> realTickets.getCount(ticketType) > 0)
 					.collect(Collectors.toSet());
-					
+				
+				if (!setup.graph.nodes().contains(source)) throw new IllegalArgumentException();
+				//setup.graph.incidentEdges(source).stream().forEach(edge -> {
+				//	ImmutableSet<Transport> transportMethods = setup.graph.edgeValue(edge)
+				//		.get().stream()
+				//		.filter(transportMethod -> player.tickets()./**is present in availableTickets */)
+				//	//create new Move object
+				//});
+				
 				// 	ImmutableList<Transport> transportMethods= setup.graph.edgeValue(edge)
 				// 	.filter(transport -> player.tickets().get(transport) != 0); //returns transport options for edge
 				// 	for(Transport transport: transportMethods) {
