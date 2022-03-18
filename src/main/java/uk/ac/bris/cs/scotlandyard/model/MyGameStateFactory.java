@@ -21,6 +21,7 @@ import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
 import uk.ac.bris.cs.scotlandyard.model.Piece.Detective;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Factory;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
+import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Transport;
 
 /**
  * cw-model
@@ -124,20 +125,41 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			
 		}
 
-		private Set<Move> getSingleMoves(
+		private ImmutableSet<Move> getSingleMoves(
 			GameSetup setup,
-			List<Player> detectives, 
+			ImmutableList<Player> detectives, 
 			Player player, 
 			int source){
-				Set<Move> playerMoves = new HashSet<>();
+				/** 
+				* for a given player, return an ImmutableSet of possible moves it can do
+				*  - iterate through every edge, and filter each transport
+				*/
+				Set<Move> playerMoves = Set.of();
 				Optional<TicketBoard> tickets = this.getPlayerTickets(player.piece());
 				if(tickets.isEmpty()) throw new IllegalArgumentException();
-				TicketBoard realTickets = tickets.get();
+				// TicketBoard realTickets = tickets.filter(ticketboard -> ticketboard.getCount(ticket));
+				
 
-				setup.graph.incidentEdges(source).forEach(pair -> {
-					setup.graph.edgeValue(pair).get(); //returns transport options for edge
-				});
-				return playerMoves;
+				// setup.graph.incidentEdges(source).forEach(edge -> {
+					
+				// 	ImmutableList<Transport> transportMethods= setup.graph.edgeValue(edge)
+				// 	.filter(transport -> player.tickets().get(transport) != 0); //returns transport options for edge
+				// 	for(Transport transport: transportMethods) {
+
+				// 		Move current = new Move() {
+
+				// 			Piece commencedBy() {
+				// 				return player.piece();
+				// 			}
+
+				// 			Iterable<tickets> tickets() {
+				// 				return Iterable.;
+				// 			}
+				// 		}	
+				// 	}
+
+				// });
+				return ImmutableSet.copyOf(playerMoves);
 		}
 
 		@Override
