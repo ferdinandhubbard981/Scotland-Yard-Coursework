@@ -152,8 +152,10 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public ImmutableSet<Piece> getWinner() {
-			return winner;
+			return this.winner;
 			
+			//Implement logic for checking if there is a winner in contructor or advance?
+
 			//check if any detective location == mrx location
 
 			//check if mrxs travel log count == max number of moves
@@ -163,19 +165,29 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		@Override
 		public ImmutableSet<Move> getAvailableMoves() {
 			//winner is defined, then return empty moves list
-			/*
-			if (!this.winner.isEmpty()) {
-				this.moves = ImmutableSet.<Move>builder().build();
-				return this.moves;
-			}
-			//mrX can make both double and single moves
-			this.getPlayerTickets(piece)
-			for (Player player : players){
-				//if mrX then calculate double moves
-				//calculate player single moves
-				//create instances of moves (taxi, bus, underground)
-				//update and remove
-			}		*/
+			//might not work because winner is calculated by figuring out there are available moves not the other way around
+			// if (!this.winner.isEmpty()) {
+			// 	this.moves = ImmutableSet.<Move>builder().build();
+			// 	return this.moves;
+			// }
+			
+			// mrX can make both double and single moves
+			
+			// calculate moves for mrX
+			// mrX then calculate double moves
+
+			// calculate moves for detectives
+			// this.getPlayerTickets(piece)
+			for (Player det : detectives){
+				ImmutableList<Ticket> availableTickets = null; // = types of tickets that the player has at least 1 of
+				for (Ticket ticket : availableTickets) {
+					// calculate all possible moves
+					// create instances of moves (taxi, bus, underground)
+
+					
+					// update and remove ??
+				}
+			}		
 			return null;
 		}
 
