@@ -1,0 +1,13 @@
+machine learning algorithm:
+detective ai plays mrX ai many times until they git gud
+
+mrX
+neural network inputs parser:
+ImmutableSet<Move> possible moves
+ImmutableList<LogEntry> mrXTravelLog
+Optional<TicketBoard> mrXtickets
+ImmutableList<Optional<TicketBoard>> detectives tickets
+
+
+neural network output:
+Move moveToPlay
