@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -137,10 +138,11 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				Set<Move> playerMoves = Set.of();
 				Optional<TicketBoard> tickets = this.getPlayerTickets(player.piece());
 				if(tickets.isEmpty()) throw new IllegalArgumentException();
-				// TicketBoard realTickets = tickets.filter(ticketboard -> ticketboard.getCount(ticket));
-				
-
-				// setup.graph.incidentEdges(source).forEach(edge -> {
+				//implemented ticket filter
+				TicketBoard realTickets = tickets.get();
+				Set<Ticket> availableTickets = Stream.of(Ticket.values())
+					.filter(ticketType -> realTickets.getCount(ticketType) > 0)
+					.collect(Collectors.toSet());
 					
 				// 	ImmutableList<Transport> transportMethods= setup.graph.edgeValue(edge)
 				// 	.filter(transport -> player.tickets().get(transport) != 0); //returns transport options for edge
