@@ -136,39 +136,51 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				*  - iterate through every edge, and filter each transport
 				*/
 				Set<Move> playerMoves = Set.of();
+				//ticketboard ~= ticket count for each ticket
 				Optional<TicketBoard> tickets = this.getPlayerTickets(player.piece());
-				if(tickets.isEmpty()) throw new IllegalArgumentException();
+
+				if(tickets.isEmpty()) throw new IllegalArgumentException(); //Is this true?? if 1 detective has no more tickets but others have some left then the game should carry on
+				
 				//implemented ticket filter
-				TicketBoard realTickets = tickets.get();
+				TicketBoard playerTickets = tickets.get();
 				Set<Ticket> availableTickets = Stream.of(Ticket.values())
-					.filter(ticketType -> realTickets.getCount(ticketType) > 0)
+					.filter(ticketType -> playerTickets.getCount(ticketType) > 0)
 					.collect(Collectors.toSet());
 				
+				//checking if source node exists
 				if (!setup.graph.nodes().contains(source)) throw new IllegalArgumentException();
-				//setup.graph.incidentEdges(source).stream().forEach(edge -> {
-				//	ImmutableSet<Transport> transportMethods = setup.graph.edgeValue(edge)
-				//		.get().stream()
-				//		.filter(transportMethod -> player.tickets()./**is present in availableTickets */)
-				//	//create new Move object
-				//});
+
+				setup.graph.incidentEdges(source).stream(). //gets a stream of edges coming from the source node
+				forEach(edge -> { //iterating through each edge
+					List<Transport> transportMethods = 
+					setup.graph.edgeValue(edge).get().asList()
+					.stream() //gets stream of transport methods associated with current edge
+						.filter(transportMethod -> availableTickets.contains(transportMethod)).toList();
+					for (Transport transportMethod : transportMethods) {
+						//create new Move object
+						// Move current = new Move() {
+
+						// 	public Piece commencedBy() {
+						// 		return player.piece();
+						// 	}
+
+						// 	public Iterable<Ticket> tickets() {
+
+						// 		List<Ticket> output = new LinkedList<Ticket>();
+						// 		output.add(transportMethod.requiredTicket());
+						// 		return output;
+						// 	}
+							
+						// 	public int source() {return source;}
+
+						// };
+					}
+				}
+
+				);
+					
+					
 				
-				// 	ImmutableList<Transport> transportMethods= setup.graph.edgeValue(edge)
-				// 	.filter(transport -> player.tickets().get(transport) != 0); //returns transport options for edge
-				// 	for(Transport transport: transportMethods) {
-
-				// 		Move current = new Move() {
-
-				// 			Piece commencedBy() {
-				// 				return player.piece();
-				// 			}
-
-				// 			Iterable<tickets> tickets() {
-				// 				return Iterable.;
-				// 			}
-				// 		}	
-				// 	}
-
-				// });
 				return ImmutableSet.copyOf(playerMoves);
 		}
 
