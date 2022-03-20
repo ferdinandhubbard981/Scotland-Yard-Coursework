@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
 import uk.ac.bris.cs.scotlandyard.model.Piece.Detective;
+import uk.ac.bris.cs.scotlandyard.model.Piece.MrX;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Factory;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Transport;
@@ -92,18 +93,13 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				if(locations.get(detective.location()) != null) throw new IllegalArgumentException();
 				locations.put(detective.location(), detective.piece().webColour());
 
-			
+			Set<Move> movesToBeAdded = Set.of();
 			//Find all possible moves
-			//winner is defined, then return empty moves list
-			//might not work because winner is calculated by figuring out there are available moves not the other way around
-			// if (!this.winner.isEmpty()) {
-			// 	this.moves = ImmutableSet.<Move>builder().build();
-			// 	return this.moves;
-			// }
 			
 			// mrX can make both double and single moves
-			
+			// movesToBeAdded.addAll(getSingleMoves(setup, detectives, mrX, mrX.location()));
 			// calculate moves for mrX
+
 			// mrX then calculate double moves
 
 			// calculate moves for detectives
@@ -118,7 +114,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			// 		// update and remove ??
 			// 	}
 			// }	
-
+			 moves = ImmutableSet.copyOf(movesToBeAdded);
 			//update winners based on possible moves list
 			}
 			
@@ -126,7 +122,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			
 		}
 
-		private ImmutableSet<Move> getSingleMoves(
+		private Set<Move> getSingleMoves(
 			GameSetup setup,
 			ImmutableList<Player> detectives, 
 			Player player, 
@@ -150,40 +146,44 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				//checking if source node exists
 				if (!setup.graph.nodes().contains(source)) throw new IllegalArgumentException();
 
-				setup.graph.incidentEdges(source).stream(). //gets a stream of edges coming from the source node
-				forEach(edge -> { //iterating through each edge
-					List<Transport> transportMethods = 
-					setup.graph.edgeValue(edge).get().asList()
-					.stream() //gets stream of transport methods associated with current edge
-						.filter(transportMethod -> availableTickets.contains(transportMethod)).toList();
+				 //iterating through all adjacent nodes
+				for (int destination : setup.graph.adjacentNodes(source)) { 
+					//TODO check if detective is not on node
+
+					//gets stream of transport methods associated with current edge
+					List<Transport> transportMethods = setup.graph.edgeValueOrDefault(source, destination, ImmutableSet.of())
+					.asList().stream() 
+					//removes transport methods for which player doesn't have a ticket
+					.filter(transportMethod -> availableTickets.contains(transportMethod)).toList(); 
+					
 					for (Transport transportMethod : transportMethods) {
-						//create new Move object
-						// Move current = new Move() {
-
-						// 	public Piece commencedBy() {
-						// 		return player.piece();
-						// 	}
-
-						// 	public Iterable<Ticket> tickets() {
-
-						// 		List<Ticket> output = new LinkedList<Ticket>();
-						// 		output.add(transportMethod.requiredTicket());
-						// 		return output;
-						// 	}
-							
-						// 	public int source() {return source;}
-
-						// };
+						//add move to the list
+						playerMoves.add(buildMove(player, transportMethod, source));
 					}
 				}
 
-				);
-					
-					
-				
-				return ImmutableSet.copyOf(playerMoves);
+				return playerMoves;
 		}
 
+		Move buildMove(Player player, Transport transportMethod, int source) {
+			return new Move() {
+
+				public Piece commencedBy() {
+					return player.piece();
+				}
+
+				public Iterable<Ticket> tickets() {
+
+					List<Ticket> output = new LinkedList<Ticket>();
+					output.add(transportMethod.requiredTicket());
+					return output;
+				}
+				
+				public int source() {return source;}
+				
+				public <T> T accept(Visitor<T> visitor) {return null;}
+			};
+		}
 		@Override
 		public GameSetup getSetup() {
 			//implemented getSetup
