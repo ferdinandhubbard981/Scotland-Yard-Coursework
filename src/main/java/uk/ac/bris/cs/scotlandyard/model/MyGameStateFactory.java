@@ -24,6 +24,8 @@ import uk.ac.bris.cs.scotlandyard.model.Piece.MrX;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Factory;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Transport;
+import uk.ac.bris.cs.scotlandyard.model.Move.*;
+
 
 /**
  * cw-model
@@ -128,21 +130,19 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			
 		}
 
-		private Set<Move> getSingleMoves(
+		private Set<SingleMove> getSingleMoves(
 			GameSetup setup,
 			ImmutableList<Player> detectives, 
-			Player player, 
+			Player player,
 			int source){
 				/*
-				* for a given player, return an ImmutableSet of possible moves it can do
+				* for a given player, return a set of possible moves it can do
 				*  - iterate through every edge, and filter each transport
 				*/
-				Set<Move> playerMoves = new HashSet<>();
+				Set<SingleMove> playerMoves = new HashSet<>();
 				//ticketboard ~= ticket count for each ticket
 				Optional<TicketBoard> tickets = this.getPlayerTickets(player.piece());
 
-				if(tickets.isEmpty()) throw new IllegalArgumentException(); //Is this true?? if 1 detective has no more tickets but others have some left then the game should carry on
-				
 				//implemented ticket filter
 				TicketBoard playerTickets = tickets.get();
 				Set<Ticket> availableTickets = Stream.of(Ticket.values())
@@ -155,7 +155,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				 //iterating through all adjacent nodes
 				for (int destination : setup.graph.adjacentNodes(source)) { 
 					//TODO check if detective is not on node
-
+					if (detectiveOnLocation(destination, detectives)) continue;
 					//gets stream of transport methods associated with current edge
 					List<Transport> transportMethods = setup.graph.edgeValueOrDefault(source, destination, ImmutableSet.of())
 					.asList().stream() 
@@ -165,32 +165,21 @@ public final class MyGameStateFactory implements Factory<GameState> {
 					
 					for (Transport transportMethod : transportMethods) {
 						//add move to the list
-						playerMoves.add(buildMove(player, transportMethod, source));
+						playerMoves.add(new SingleMove(player.piece(), source, transportMethod.requiredTicket(), destination));
 					}
 				}
 
 				return playerMoves;
 		}
 
-		Move buildMove(Player player, Transport transportMethod, int source) {
-			return new Move() {
+//		Set<Move> doubleMove() {
+//
+//
+//
+//
+//		}
 
-				public Piece commencedBy() {
-					return player.piece();
-				}
 
-				public Iterable<Ticket> tickets() {
-
-					List<Ticket> output = new LinkedList<Ticket>();
-					output.add(transportMethod.requiredTicket());
-					return output;
-				}
-				
-				public int source() {return source;}
-				
-				public <T> T accept(Visitor<T> visitor) {return null;}
-			};
-		}
 		@Override
 		public GameSetup getSetup() {
 			//implemented getSetup
@@ -273,6 +262,13 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		
 	};
 
+	//helper functions
+	boolean detectiveOnLocation(int location, ImmutableList<Player> detectives) {
+		for (Player detective : detectives) {
+			if (detective.location() == location) return true;
+		}
+		return false;
+	}
 		//throw new RuntimeException("Implement me!");
 		
 	
