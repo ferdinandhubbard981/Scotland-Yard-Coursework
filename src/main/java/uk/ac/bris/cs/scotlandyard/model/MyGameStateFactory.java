@@ -58,6 +58,11 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			this.mrX = mrX;
 			this.detectives = detectives;
 			this.winner = ImmutableSet.of();
+			this.moves = ImmutableSet.of();
+			//making list of all players for convenience
+//			List<Player> allPlayers = new ArrayList<>();
+//			allPlayers.addAll(detectives);
+//			allPlayers.add(mrX);
 
 			//checking for null inputs
 			if (mrX == null) throw new NullPointerException();
@@ -85,42 +90,41 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 			//check detective location overlaps test: testLocationOverlapBetweenDetectivesShouldThrow
 			HashMap<Integer, String> locations = new HashMap<>();
-			for (Player detective : detectives){
-				if(locations.get(detective.location()) != null) throw new IllegalArgumentException();
+			for (Player detective : detectives) {
+				if (locations.get(detective.location()) != null) throw new IllegalArgumentException();
 				locations.put(detective.location(), detective.piece().webColour());
-
-			Set<Move> movesToBeAdded = new HashSet<>();
-			//Find all possible moves
-
-			//get mrx single moves
-			movesToBeAdded.addAll(getSingleMoves(setup, detectives, mrX, mrX.tickets(), mrX.location()));
-			movesToBeAdded.addAll(getDoubleMoves(setup, detectives, mrX, mrX.location()));
-
-//			Set<Integer> intList1 = new HashSet<>();
-//			Set<Integer> intList2 = Set.of(1, 2);
-//			intList1.addAll(intList2);
-//			movesToBeAdded.addAll(Set.of(buildMove(mrX, Transport.TAXI, 5)));
-			// calculate moves for mrX
-
-			// mrX then calculate double moves
-
-			// calculate moves for detectives
-			// this.getPlayerTickets(piece)
-			// for (Player det : detectives){
-			// 	ImmutableList<Ticket> availableTickets = null; // = types of tickets that the player has at least 1 of
-			// 	for (Ticket ticket : availableTickets) {
-			// 		// calculate all possible moves
-			// 		// create instances of moves (taxi, bus, underground)
-
-					
-			// 		// update and remove ??
-			// 	}
-			// }	
-			 moves = ImmutableSet.copyOf(movesToBeAdded);
-			//update winners based on possible moves list
 			}
+			Set<Move> movesToBeAdded = new HashSet<>();
+			Set<Move> mrXMoves = new HashSet<>();
+			Set<Move> detectiveMoves = new HashSet<>();
+			//get mrx single and double moves
+			mrXMoves.addAll(getSingleMoves(setup, detectives, mrX, mrX.tickets(), mrX.location()));
+			mrXMoves.addAll(getDoubleMoves(setup, detectives, mrX, mrX.location()));
+			//Find all detective moves
+			for (Player det : detectives) {
+				detectiveMoves.addAll(getSingleMoves(setup, detectives, det, det.tickets(), det.location()));
+			}
+
+			//TODO if mrX is surrounded by detectives then detectives win aka mrX has no moves left
+			if (mrXMoves.isEmpty()) winner = ImmutableSet.copyOf(detectives.asList().stream().map(det -> det.piece()).collect(Collectors.toUnmodifiableSet()));
+			//TODO if a detective is on the same square than mrX then the detectives win
+			for (Player detective : detectives) {
+				if (mrX.location() == detective.location()) winner = ImmutableSet.copyOf(detectives.asList().stream().map(det -> det.piece()).collect(Collectors.toUnmodifiableSet()));
+			}
+
+			//if detectives have no moves left then mrX wins
+			if (detectiveMoves.isEmpty()) winner = ImmutableSet.of(mrX.piece());
+			//TODO if mrX log book is full then mrx wins
+			//if none of the conditions above are met then carry on
+		 	if (winner.isEmpty()) {
+				movesToBeAdded.addAll(mrXMoves);
+				movesToBeAdded.addAll(detectiveMoves);
+				//updates the ACTUAL moves list
+				moves = ImmutableSet.copyOf(movesToBeAdded);
+			}
+
 			
-			//implement initial moves getter here
+			//implement initial moves getter here???
 			
 		}
 
@@ -176,6 +180,8 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			ImmutableSet<SingleMove> firstMoveList = ImmutableSet.copyOf(getSingleMoves(setup, detectives, player, player.tickets(), source));
 			// check if contains x2 ticket
 			if (player.tickets().get(Ticket.DOUBLE) == 0)  return doubleMoves;
+
+			//TODO check if mrX has enough space in his travel log for double move
 
 			//iterate through every possible first move
 			for (SingleMove move1 : firstMoveList){
