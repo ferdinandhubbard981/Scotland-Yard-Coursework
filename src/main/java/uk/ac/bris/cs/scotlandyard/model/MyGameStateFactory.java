@@ -4,19 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
 import uk.ac.bris.cs.scotlandyard.model.Piece.Detective;
@@ -97,10 +91,10 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 			Set<Move> movesToBeAdded = new HashSet<>();
 			//Find all possible moves
-			
-			// mrX can make both double and single moves
-//			Set<Move> mrXSingleMoves = getSingleMoves(setup, detectives, mrX, mrX.location());
-			movesToBeAdded.addAll(getSingleMoves(setup, detectives, mrX, mrX.location()));
+
+			//get mrx single moves
+			movesToBeAdded.addAll(getSingleMoves(setup, detectives, mrX, mrX.tickets(), mrX.location()));
+			movesToBeAdded.addAll(getDoubleMoves(setup, detectives, mrX, mrX.location()));
 
 //			Set<Integer> intList1 = new HashSet<>();
 //			Set<Integer> intList2 = Set.of(1, 2);
@@ -132,29 +126,28 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		private Set<SingleMove> getSingleMoves(
 			GameSetup setup,
-			ImmutableList<Player> detectives, 
+			ImmutableList<Player> detectives,
 			Player player,
+			ImmutableMap<Ticket, Integer> playerTickets,
 			int source){
 				/*
 				* for a given player, return a set of possible moves it can do
 				*  - iterate through every edge, and filter each transport
 				*/
 				Set<SingleMove> playerMoves = new HashSet<>();
-				//ticketboard ~= ticket count for each ticket
-				Optional<TicketBoard> tickets = this.getPlayerTickets(player.piece());
 
 				//implemented ticket filter
-				TicketBoard playerTickets = tickets.get();
+
 				Set<Ticket> availableTickets = Stream.of(Ticket.values())
-					.filter(ticketType -> playerTickets.getCount(ticketType) > 0)
+					.filter(ticketType -> playerTickets.get(ticketType) > 0)
 					.collect(Collectors.toSet());
 				
 				//checking if source node exists
 				if (!setup.graph.nodes().contains(source)) throw new IllegalArgumentException();
 
 				 //iterating through all adjacent nodes
-				for (int destination : setup.graph.adjacentNodes(source)) { 
-					//TODO check if detective is not on node
+				for (int destination : setup.graph.adjacentNodes(source)) {
+					//check if detective is on destination node
 					if (detectiveOnLocation(destination, detectives)) continue;
 					//gets stream of transport methods associated with current edge
 					List<Transport> transportMethods = setup.graph.edgeValueOrDefault(source, destination, ImmutableSet.of())
@@ -172,12 +165,34 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				return playerMoves;
 		}
 
-//		Set<Move> doubleMove() {
-//
-//
-//
-//
-//		}
+		Set<DoubleMove> getDoubleMoves(
+				GameSetup setup,
+				ImmutableList<Player> detectives,
+				Player player,
+				int source) {
+			//declare variables
+			Set<DoubleMove> doubleMoves= new HashSet<>();
+			//get single moves
+			ImmutableSet<SingleMove> firstMoveList = ImmutableSet.copyOf(getSingleMoves(setup, detectives, player, player.tickets(), source));
+			// check if contains x2 ticket
+			if (player.tickets().get(Ticket.DOUBLE) == 0)  return doubleMoves;
+
+			//iterate through every possible first move
+			for (SingleMove move1 : firstMoveList){
+				//getting player tickets after first move i.e. removing the ticket that he used on the first move
+				Map<Ticket, Integer> newPlayerTickets = modifyPlayerTickets(player.tickets(), ImmutableMap.of(move1.ticket, -1));
+				//generating set of second moves by using getSingleMoves with the updated ticket list
+				Set<SingleMove> secondMoveList = getSingleMoves(setup, detectives, player, player.tickets(), source);
+				// iterate through every possible second move
+				for (SingleMove move2 : secondMoveList) {
+					//build DoubleMove from two SingleMove
+					doubleMoves.add(buildDoubleMove(move1, move2));
+				}
+			}
+			return doubleMoves;
+		}
+
+
 
 
 		@Override
@@ -259,17 +274,33 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			// TODO Auto-generated method stub
 			return null;
 		}
+
+
+		//helper functions
+		boolean detectiveOnLocation(int location, ImmutableList<Player> detectives) {
+			for (Player detective : detectives) {
+				if (detective.location() == location) return true;
+			}
+			return false;
+		}
+
+		Map<Ticket, Integer> modifyPlayerTickets(ImmutableMap<Ticket, Integer> playerTickets,
+												 ImmutableMap<Ticket, Integer> ticketChange) {
+			Map<Ticket, Integer> newTickets = new HashMap<>();
+			for (Ticket ticket : Ticket.values()) {
+				if (ticketChange.containsKey(ticket)) {
+					newTickets.put(ticket, playerTickets.get(ticket) + ticketChange.get(ticket));
+				}
+			}
+			return newTickets;
+		}
+
+		DoubleMove buildDoubleMove(SingleMove move1, SingleMove move2) {
+			DoubleMove doubleMove = new DoubleMove(move1.commencedBy(), move1.source(), move1.ticket, move1.destination,
+					move2.ticket, move2.destination);
+			return doubleMove;
+		}
 		
 	};
 
-	//helper functions
-	boolean detectiveOnLocation(int location, ImmutableList<Player> detectives) {
-		for (Player detective : detectives) {
-			if (detective.location() == location) return true;
-		}
-		return false;
-	}
-		//throw new RuntimeException("Implement me!");
-		
-	
 }
