@@ -93,11 +93,17 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				if(locations.get(detective.location()) != null) throw new IllegalArgumentException();
 				locations.put(detective.location(), detective.piece().webColour());
 
-			Set<Move> movesToBeAdded = Set.of();
+			Set<Move> movesToBeAdded = new HashSet<>();
 			//Find all possible moves
 			
 			// mrX can make both double and single moves
-			// movesToBeAdded.addAll(getSingleMoves(setup, detectives, mrX, mrX.location()));
+//			Set<Move> mrXSingleMoves = getSingleMoves(setup, detectives, mrX, mrX.location());
+			movesToBeAdded.addAll(getSingleMoves(setup, detectives, mrX, mrX.location()));
+
+//			Set<Integer> intList1 = new HashSet<>();
+//			Set<Integer> intList2 = Set.of(1, 2);
+//			intList1.addAll(intList2);
+//			movesToBeAdded.addAll(Set.of(buildMove(mrX, Transport.TAXI, 5)));
 			// calculate moves for mrX
 
 			// mrX then calculate double moves
@@ -127,11 +133,11 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			ImmutableList<Player> detectives, 
 			Player player, 
 			int source){
-				/** 
+				/*
 				* for a given player, return an ImmutableSet of possible moves it can do
 				*  - iterate through every edge, and filter each transport
 				*/
-				Set<Move> playerMoves = Set.of();
+				Set<Move> playerMoves = new HashSet<>();
 				//ticketboard ~= ticket count for each ticket
 				Optional<TicketBoard> tickets = this.getPlayerTickets(player.piece());
 
@@ -154,7 +160,8 @@ public final class MyGameStateFactory implements Factory<GameState> {
 					List<Transport> transportMethods = setup.graph.edgeValueOrDefault(source, destination, ImmutableSet.of())
 					.asList().stream() 
 					//removes transport methods for which player doesn't have a ticket
-					.filter(transportMethod -> availableTickets.contains(transportMethod)).toList(); 
+					.filter(transportMethod -> availableTickets.contains(transportMethod.requiredTicket()))
+					.toList();
 					
 					for (Transport transportMethod : transportMethods) {
 						//add move to the list
