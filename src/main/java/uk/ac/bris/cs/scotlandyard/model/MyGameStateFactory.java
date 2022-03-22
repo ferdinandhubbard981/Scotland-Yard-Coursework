@@ -308,7 +308,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				Set<Piece> newRemainingPlayers = remaining.stream().filter(det -> det != finalDetective.piece())
 						.collect(Collectors.toSet());
 				//lambda expression needs value to be final
-				ImmutableSet immutableNewRemainingPlayers = ImmutableSet.copyOf(newRemainingPlayers);
+				ImmutableSet<Piece> immutableNewRemainingPlayers = ImmutableSet.copyOf(newRemainingPlayers);
 				//getting newRemainingPlayers in the form of ImmutableList<Player> for checking of moves afterwards
 				ImmutableList<Player> remainingDetectives = ImmutableList.copyOf(detectives.stream()
 						.filter(det -> immutableNewRemainingPlayers.contains(det.piece()))
