@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import org.commonmark.node.Visitor;
+
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -271,7 +273,20 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public GameState advance(Move move) {
-			// TODO Auto-generated method stub
+			//added framework for advance??
+			if (!moves.contains(move)) throw new IllegalArgumentException();
+			move.accept(new Move.Visitor<Void>() {
+				
+				@Override public Void visit(SingleMove singleMove){
+					//implement what happens when a single move is done
+					return null;
+				}
+
+				@Override public Void visit(DoubleMove doubleMove){
+					//implement what happens when a double move is done
+					return null;
+				}
+			});
 			return null;
 		}
 
