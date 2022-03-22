@@ -285,11 +285,18 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				
 				@Override public Void visit(SingleMove singleMove){
 					//implement what happens when a single move is done
+					//remove current move from list of all moves
+						//and update to reflect current player position
+					//change position of player
+					//remove ticket -> give to mrX if player is not mrX else destroy ticket
 					return null;
 				}
 
 				@Override public Void visit(DoubleMove doubleMove){
-					//implement what happens when a double move is done
+					//implement what happens when a double move is done	
+					//remove move from list and update
+					//change position of player (i.e. mrX)
+					//remove the two tickets
 					return null;
 				}
 			});
