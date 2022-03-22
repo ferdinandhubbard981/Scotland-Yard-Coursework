@@ -287,11 +287,11 @@ public final class MyGameStateFactory implements Factory<GameState> {
 					if (move.commencedBy() == mrX.piece()) { //mrX played this move
 						//add move to log (checking if setup.move is hidden or not)
 						List<LogEntry> newLog = new ArrayList<>(log);
-						if (setup.moves.get(log.size()) == true) newLog.add(LogEntry.hidden(singleMove.ticket));
-						else newLog.add(LogEntry.reveal(singleMove.ticket, move.source()));
+						if (setup.moves.get(newLog.size()) == true) newLog.add(LogEntry.hidden(singleMove.ticket));
+						else newLog.add(LogEntry.reveal(singleMove.ticket, singleMove.source()));
 						//take used tickets away from mrX
 						mrX = mrX.use(singleMove.ticket);
-						//move mrX position to move.destination
+						//move mrX position to destination
 						mrX = mrX.at(singleMove.destination);
 						//swap to the detectives turn (update the remaining variable)
 						//mrX plays first therefore all the detectives have yet to play their turn
@@ -328,23 +328,25 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 
 				@Override public GameState visit(DoubleMove doubleMove){
-					//TODO advance gets called with type DoubleMove
-					if (move.commencedBy() == mrX.piece()) {
-						//TODO add move to log (checking if setup.move is hidden or not)
-						//TODO take used tickets away from mrX
-						//TODO move mrX position to move.destination
-						//TODO swap to the detectives turn (update the remaining variable)
-					}
-					else {
-						//TODO move detective to move.destination
-						//TODO take used ticket from detective and give to mrX
-						//TODO Ensure that particular detective won't move again this round
-						// (i.e. when getAvailableMoves() is called, it won't include any moves from that detective)
-						// aka update remaining variable
-						//TODO if remaining detectives have no more moves to play then swap to mrX turn (update remaining variable)
-					}
-//					return new MyGameState();
-					return null;
+					//advance gets called with type DoubleMove
+					//add move to log (checking if setup.move is hidden or not)
+					List<LogEntry> newLog = new ArrayList<>(log);
+					if (setup.moves.get(newLog.size()) == true) newLog.add(LogEntry.hidden(doubleMove.ticket1));
+					else newLog.add(LogEntry.reveal(doubleMove.ticket1, doubleMove.source()));
+					if (setup.moves.get(newLog.size()) == true) newLog.add(LogEntry.hidden(doubleMove.ticket2));
+					else newLog.add(LogEntry.reveal(doubleMove.ticket2, doubleMove.destination1));
+					//take used tickets away from mrX
+					mrX = mrX.use(doubleMove.tickets());
+					//move mrX position to destination
+					mrX = mrX.at(doubleMove.destination2);
+					//swap to the detectives turn (update the remaining variable)
+					//mrX plays first therefore all the detectives have yet to play their turn
+					//we don't need to check that at least 1 detective has at least 1 move here
+					//because we check for that in win conditions
+					ImmutableSet<Piece> newRemainingPlayers = ImmutableSet.copyOf(detectives.stream().map(det -> det.piece()).collect(Collectors.toSet()));
+					//return gamesState
+					return new MyGameState(setup, newRemainingPlayers, ImmutableList.copyOf(newLog), mrX, ImmutableList.copyOf(detectives));
+
 				}
 			});
 		}
