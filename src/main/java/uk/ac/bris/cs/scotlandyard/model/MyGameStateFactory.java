@@ -36,7 +36,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		private ImmutableSet<Piece> remaining; //the players who have yet to play in the round??
 		private ImmutableList<LogEntry> log;
 		private Player mrX;
-		private List<Player> detectives;
+		private ImmutableList<Player> detectives;
 		private ImmutableSet<Move> moves;
 		private ImmutableSet<Piece> winner;
 
@@ -95,18 +95,21 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			//get detective moves
 			Set<Move> detectiveMoves = getMoves(detectives, detectives);
 
-			//TODO if mrX is surrounded by detectives then detectives win aka mrX has no moves left
+			//if mrX is surrounded by detectives then detectives win aka mrX has no moves left
 			if (mrXMoves.isEmpty())
 				winner = ImmutableSet.copyOf(detectives.asList().stream().map(det -> det.piece()).collect(Collectors.toUnmodifiableSet()));
-			//TODO if a detective is on the same square than mrX then the detectives win
+			//if a detective is on the same square than mrX then the detectives win
 			for (Player detective : detectives) {
-				if (mrX.location() == detective.location())
+				if (mrX.location() == detective.location()) {
 					winner = ImmutableSet.copyOf(detectives.asList().stream().map(det -> det.piece()).collect(Collectors.toUnmodifiableSet()));
+					break;
+				}
 			}
 
 			//if detectives have no moves left then mrX wins
 			if (detectiveMoves.isEmpty()) winner = ImmutableSet.of(mrX.piece());
-			//TODO if mrX log book is full then mrx wins
+			//if mrX log book is full then mrx wins
+			if (log.size() == setup.moves.size()) winner = ImmutableSet.of(mrX.piece());
 			//if none of the conditions above are met then carry on
 			if (winner.isEmpty()) {
 				//updates the ACTUAL moves list with the moves of the remaining players
@@ -278,20 +281,22 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				//add move to log (checking if setup.move is hidden or not)
 				List<LogEntry> newLog = getNewLog(move, setup, log);
 				//take used tickets away from mrX
-				mrX = mrX.use(move.tickets());
+				this.mrX = this.mrX.use(move.tickets());
 				//move mrX position to destination
-				mrX = mrX.at(getMoveDestination(move));
+				this.mrX = this.mrX.at(getMoveDestination(move));
 				//swap to the detectives turn (update the remaining variable)
 				//mrX plays first therefore all the detectives have yet to play their turn
 				//we don't need to check that at least 1 detective has at least 1 move here
 				//because we check for that in win conditions
 				ImmutableSet<Piece> newRemainingPlayers = ImmutableSet.copyOf(detectives.stream().map(det -> det.piece()).collect(Collectors.toSet()));
 				//return gamesState
-				return new MyGameState(setup, newRemainingPlayers, ImmutableList.copyOf(newLog), mrX, ImmutableList.copyOf(detectives));
+				return new MyGameState(setup, newRemainingPlayers, ImmutableList.copyOf(newLog), this.mrX, ImmutableList.copyOf(detectives));
 
 			} else {
 				//finding detective who made the move
-				Player detective = detectives.stream().filter(det -> det.piece() == move.commencedBy()).findFirst().get();
+				int index = detectives.indexOf(detectives.stream().filter(det -> det.piece() == move.commencedBy()).findFirst().get());
+				Player detective = detectives.get(index);
+//				Player detective = detectives.stream().filter(det -> det.piece() == move.commencedBy()).findFirst().get();
 				//move detective to move.destination
 				detective = detective.at(getMoveDestination(move));
 				//take used ticket from detective and give to mrX
@@ -310,7 +315,10 @@ public final class MyGameStateFactory implements Factory<GameState> {
 						.toList());
 				//if remaining detectives have no more moves to play then swap to mrX turn (update remaining variable)
 				if (getMoves(remainingDetectives, detectives).isEmpty()) newRemainingPlayers = Set.of(mrX.piece());
-				return new MyGameState(setup, ImmutableSet.copyOf(newRemainingPlayers), log, mrX, ImmutableList.copyOf(detectives));
+				//TODO error detective is not referencing the detective in the list detectives
+				List<Player> mutableDetectives = new ArrayList<>(this.detectives);
+				mutableDetectives.set(index, detective);
+				return new MyGameState(setup, ImmutableSet.copyOf(newRemainingPlayers), log, mrX, ImmutableList.copyOf(mutableDetectives));
 
 			}
 		}
