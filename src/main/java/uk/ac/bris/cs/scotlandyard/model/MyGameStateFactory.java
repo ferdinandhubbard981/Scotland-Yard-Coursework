@@ -192,9 +192,9 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			//iterate through every possible first move
 			for (SingleMove move1 : firstMoveList){
 				//getting player tickets after first move i.e. removing the ticket that he used on the first move
-				Map<Ticket, Integer> newPlayerTickets = modifyPlayerTickets(player.tickets(), ImmutableMap.of(move1.ticket, -1));
+				ImmutableMap<Ticket, Integer> newPlayerTickets = ImmutableMap.copyOf(modifyPlayerTickets(player.tickets(), ImmutableMap.of(move1.ticket, -1)));
 				//generating set of second moves by using getSingleMoves with the updated ticket list
-				Set<SingleMove> secondMoveList = getSingleMoves(setup, detectives, player, player.tickets(), move1.destination);
+				Set<SingleMove> secondMoveList = getSingleMoves(setup, detectives, player, newPlayerTickets, move1.destination);
 				// iterate through every possible second move
 				for (SingleMove move2 : secondMoveList) {
 					//build DoubleMove from two SingleMove
@@ -326,6 +326,8 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				if (ticketChange.containsKey(ticket)) {
 					newTickets.put(ticket, playerTickets.get(ticket) + ticketChange.get(ticket));
 				}
+				else newTickets.put(ticket, playerTickets.get(ticket));
+
 			}
 			return newTickets;
 		}
