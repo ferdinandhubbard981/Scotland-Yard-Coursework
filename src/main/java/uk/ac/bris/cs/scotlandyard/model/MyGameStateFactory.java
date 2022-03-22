@@ -184,6 +184,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			if (player.tickets().get(Ticket.DOUBLE) == 0)  return doubleMoves;
 
 			//TODO check if mrX has enough space in his travel log for double move
+			if (log.size() + 2 == setup.moves.size()) return doubleMoves;
 
 			//iterate through every possible first move
 			for (SingleMove move1 : firstMoveList){
