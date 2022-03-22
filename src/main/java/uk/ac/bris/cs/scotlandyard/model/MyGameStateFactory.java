@@ -96,15 +96,10 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				if (locations.get(detective.location()) != null) throw new IllegalArgumentException();
 				locations.put(detective.location(), detective.piece().webColour());
 			}
-			Set<Move> mrXMoves = new HashSet<>();
-			Set<Move> detectiveMoves = new HashSet<>();
-			//get mrx single and double moves
-			mrXMoves.addAll(getSingleMoves(setup, detectives, mrX, mrX.tickets(), mrX.location()));
-			mrXMoves.addAll(getDoubleMoves(setup, detectives, mrX, mrX.location()));
-			//Find all detective moves
-			for (Player det : detectives) {
-				detectiveMoves.addAll(getSingleMoves(setup, detectives, det, det.tickets(), det.location()));
-			}
+			//get mrX moves
+			Set<Move> mrXMoves = getMoves(ImmutableList.of(mrX), detectives);
+			//get detective moves
+			Set<Move> detectiveMoves = getMoves(detectives, detectives);
 
 			//TODO if mrX is surrounded by detectives then detectives win aka mrX has no moves left
 			if (mrXMoves.isEmpty()) winner = ImmutableSet.copyOf(detectives.asList().stream().map(det -> det.piece()).collect(Collectors.toUnmodifiableSet()));
@@ -133,7 +128,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			GameSetup setup,
 			ImmutableList<Player> detectives,
 			Player player,
-			ImmutableMap<Ticket, Integer> playerTickets,
 			int source){
 				/*
 				* for a given player, return a set of possible moves it can do
@@ -144,7 +138,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				//implemented ticket filter
 
 				Set<Ticket> availableTickets = Stream.of(Ticket.values())
-					.filter(ticketType -> playerTickets.get(ticketType) > 0)
+					.filter(ticketType -> player.tickets().get(ticketType) > 0)
 					.collect(Collectors.toSet());
 				
 				//checking if source node exists
@@ -182,7 +176,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			//declare variables
 			Set<DoubleMove> doubleMoves= new HashSet<>();
 			//get single moves
-			ImmutableSet<SingleMove> firstMoveList = ImmutableSet.copyOf(getSingleMoves(setup, detectives, player, player.tickets(), source));
+			ImmutableSet<SingleMove> firstMoveList = ImmutableSet.copyOf(getSingleMoves(setup, detectives, player, source));
 			// check if contains x2 ticket
 			if (player.tickets().get(Ticket.DOUBLE) == 0)  return doubleMoves;
 
@@ -191,10 +185,10 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 			//iterate through every possible first move
 			for (SingleMove move1 : firstMoveList){
-				//getting player tickets after first move i.e. removing the ticket that he used on the first move
-				ImmutableMap<Ticket, Integer> newPlayerTickets = ImmutableMap.copyOf(modifyPlayerTickets(player.tickets(), ImmutableMap.of(move1.ticket, -1)));
-				//generating set of second moves by using getSingleMoves with the updated ticket list
-				Set<SingleMove> secondMoveList = getSingleMoves(setup, detectives, player, newPlayerTickets, move1.destination);
+				//making hypothetical player that has used a ticket in order to find second move
+				Player hypotheticalPlayer = player.use(move1.ticket);
+				//getting second move
+				Set<SingleMove> secondMoveList = getSingleMoves(setup, detectives, hypotheticalPlayer, move1.destination);
 				// iterate through every possible second move
 				for (SingleMove move2 : secondMoveList) {
 					//build DoubleMove from two SingleMove
@@ -288,23 +282,48 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			return move.accept(new Move.Visitor<GameState>() {
 				
 				@Override public GameState visit(SingleMove singleMove){
-					//TODO advance gets called with type SingleMove
-					if (move.commencedBy() == mrX.piece()) {
-						//TODO add move to log (checking if setup.move is hidden or not)
-						//TODO take used tickets away from mrX
-						//TODO move mrX position to move.destination
-						//TODO swap to the detectives turn (update the remaining variable)
+					//advance gets called with type SingleMove
+
+					if (move.commencedBy() == mrX.piece()) { //mrX played this move
+						//add move to log (checking if setup.move is hidden or not)
+						List<LogEntry> newLog = new ArrayList<>(log);
+						if (setup.moves.get(log.size()) == true) newLog.add(LogEntry.hidden(singleMove.ticket));
+						else newLog.add(LogEntry.reveal(singleMove.ticket, move.source()));
+						//take used tickets away from mrX
+						mrX = mrX.use(singleMove.ticket);
+						//move mrX position to move.destination
+						mrX = mrX.at(singleMove.destination);
+						//swap to the detectives turn (update the remaining variable)
+						//mrX plays first therefore all the detectives have yet to play their turn
+						//we don't need to check that at least 1 detective has at least 1 move here
+						//because we check for that in win conditions
+						ImmutableSet<Piece> newRemainingPlayers = ImmutableSet.copyOf(detectives.stream().map(det -> det.piece()).collect(Collectors.toSet()));
+						//return gamesState
+						return new MyGameState(setup, newRemainingPlayers, ImmutableList.copyOf(newLog), mrX, ImmutableList.copyOf(detectives));
+
 					}
 					else {
-						//TODO move detective to move.destination
-						//TODO take used ticket from detective and give to mrX
-						//TODO Ensure that particular detective won't move again this round
-						// (i.e. when getAvailableMoves() is called, it won't include any moves from that detective)
-						// aka update remaining variable
-						//TODO if remaining detectives have no more moves to play then swap to mrX turn (update remaining variable)
+						//finding detective who made the move
+						Player detective = detectives.stream().filter(det -> det.piece() == singleMove.commencedBy()).findFirst().get();
+						//move detective to move.destination
+						detective = detective.at(singleMove.destination);
+						//take used ticket from detective and give to mrX
+						detective = detective.use(singleMove.ticket);
+						mrX = mrX.give(singleMove.ticket);
+						//Ensure that particular detective won't move again this round (remove from remaining players)
+						//lambda expression needs value to be final
+						final Player finalDetective = detective;
+						Set<Piece> newRemainingPlayers = remaining.stream().filter(det -> det != finalDetective.piece())
+								.collect(Collectors.toSet());
+						//if remaining detectives have no more moves to play then swap to mrX turn (update remaining variable)
+						ImmutableSet immutableNewRemainingPlayers = ImmutableSet.copyOf(newRemainingPlayers);
+						ImmutableList<Player> remainingDetectives = ImmutableList.copyOf(detectives.stream()
+							.filter(det -> immutableNewRemainingPlayers.contains(det.piece()))
+							.toList());
+						if (getMoves(remainingDetectives, detectives).isEmpty()) newRemainingPlayers = Set.of(mrX.piece());
+						return new MyGameState(setup, ImmutableSet.copyOf(newRemainingPlayers), log, mrX, ImmutableList.copyOf(detectives));
+
 					}
-//					return new MyGameState();
-					return null;
 				}
 
 
@@ -341,20 +360,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			return false;
 		}
 
-		//return what a players ticket map would be after a singleMove (for use in finding second move)
-		Map<Ticket, Integer> modifyPlayerTickets(ImmutableMap<Ticket, Integer> playerTickets,
-												 ImmutableMap<Ticket, Integer> ticketChange) {
-			Map<Ticket, Integer> newTickets = new HashMap<>();
-			for (Ticket ticket : Ticket.values()) {
-				if (ticketChange.containsKey(ticket)) {
-					newTickets.put(ticket, playerTickets.get(ticket) + ticketChange.get(ticket));
-				}
-				else newTickets.put(ticket, playerTickets.get(ticket));
-
-			}
-			return newTickets;
-		}
-
 		//combine two singleMoves into a double move
 		DoubleMove buildDoubleMove(SingleMove move1, SingleMove move2) {
 			DoubleMove doubleMove = new DoubleMove(move1.commencedBy(), move1.source(), move1.ticket, move1.destination,
@@ -373,6 +378,24 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			return output;
 		}
 
+		//Find all moves for players list
+		Set<Move> getMoves(List<Player> players, List<Player> detectives) {
+			Set<Move> playerMoves = new HashSet<>();
+			for (Player player : players) {
+				playerMoves.addAll(getSingleMoves(setup, ImmutableList.copyOf(detectives), player, player.location()));
+				playerMoves.addAll(getDoubleMoves(setup, ImmutableList.copyOf(detectives), player, player.location()));
+
+			}
+			return playerMoves;
+		}
+
+		//find all moves for player
+		Set<Move> getMoves(Player player, List<Player> detectives) {
+			Set<Move> playerMoves = new HashSet<>();
+			playerMoves.addAll(getSingleMoves(setup, ImmutableList.copyOf(detectives), player, player.location()));
+			playerMoves.addAll(getDoubleMoves(setup, ImmutableList.copyOf(detectives), player, player.location()));
+			return playerMoves;
+		}
 	};
 
 }
