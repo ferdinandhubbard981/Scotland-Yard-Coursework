@@ -22,7 +22,7 @@ import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Transport;
 import uk.ac.bris.cs.scotlandyard.model.Move.*;
 
-
+//TODO encapsulate all large blocks of code into many small helper functions with meaningful names for clarity
 /**
  * cw-model
  * Stage 1: Complete this class
@@ -165,6 +165,10 @@ public final class MyGameStateFactory implements Factory<GameState> {
 						//add move to the list
 						playerMoves.add(new SingleMove(player.piece(), source, transportMethod.requiredTicket(), destination));
 					}
+					//if player has a secret ticket then add move using secret ticket
+					if (availableTickets.contains(Ticket.SECRET))
+						playerMoves.add(new SingleMove(player.piece(), source, Ticket.SECRET, destination));
+
 				}
 
 				return playerMoves;
@@ -182,8 +186,8 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			// check if contains x2 ticket
 			if (player.tickets().get(Ticket.DOUBLE) == 0)  return doubleMoves;
 
-			//TODO check if mrX has enough space in his travel log for double move
-			if (log.size() + 2 == setup.moves.size()) return doubleMoves;
+			//check if mrX has enough space in his travel log for double move
+			if (log.size() + 2 > setup.moves.size()) return doubleMoves;
 
 			//iterate through every possible first move
 			for (SingleMove move1 : firstMoveList){
