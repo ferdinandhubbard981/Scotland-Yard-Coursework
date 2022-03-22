@@ -284,27 +284,50 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		@Override
 		public GameState advance(Move move) {
 			//added framework for advance??
-			if (!moves.contains(move)) throw new IllegalArgumentException();
-			move.accept(new Move.Visitor<Void>() {
+			if(!moves.contains(move)) throw new IllegalArgumentException("Illegal move: "+move);
+			return move.accept(new Move.Visitor<GameState>() {
 				
-				@Override public Void visit(SingleMove singleMove){
-					//implement what happens when a single move is done
-					//remove current move from list of all moves
-						//and update to reflect current player position
-					//change position of player
-					//remove ticket -> give to mrX if player is not mrX else destroy ticket
+				@Override public GameState visit(SingleMove singleMove){
+					//TODO advance gets called with type SingleMove
+					if (move.commencedBy() == mrX.piece()) {
+						//TODO add move to log (checking if setup.move is hidden or not)
+						//TODO take used tickets away from mrX
+						//TODO move mrX position to move.destination
+						//TODO swap to the detectives turn (update the remaining variable)
+					}
+					else {
+						//TODO move detective to move.destination
+						//TODO take used ticket from detective and give to mrX
+						//TODO Ensure that particular detective won't move again this round
+						// (i.e. when getAvailableMoves() is called, it won't include any moves from that detective)
+						// aka update remaining variable
+						//TODO if remaining detectives have no more moves to play then swap to mrX turn (update remaining variable)
+					}
+//					return new MyGameState();
 					return null;
 				}
 
-				@Override public Void visit(DoubleMove doubleMove){
-					//implement what happens when a double move is done	
-					//remove move from list and update
-					//change position of player (i.e. mrX)
-					//remove the two tickets
+
+				@Override public GameState visit(DoubleMove doubleMove){
+					//TODO advance gets called with type DoubleMove
+					if (move.commencedBy() == mrX.piece()) {
+						//TODO add move to log (checking if setup.move is hidden or not)
+						//TODO take used tickets away from mrX
+						//TODO move mrX position to move.destination
+						//TODO swap to the detectives turn (update the remaining variable)
+					}
+					else {
+						//TODO move detective to move.destination
+						//TODO take used ticket from detective and give to mrX
+						//TODO Ensure that particular detective won't move again this round
+						// (i.e. when getAvailableMoves() is called, it won't include any moves from that detective)
+						// aka update remaining variable
+						//TODO if remaining detectives have no more moves to play then swap to mrX turn (update remaining variable)
+					}
+//					return new MyGameState();
 					return null;
 				}
 			});
-			return null;
 		}
 
 
