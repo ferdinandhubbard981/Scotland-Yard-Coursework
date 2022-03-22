@@ -39,7 +39,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		
 	private final class MyGameState implements GameState {
 		private GameSetup setup;
-		private ImmutableSet<Piece> remaining;
+		private ImmutableSet<Piece> remaining; //the players who have yet to play in the round??
 		private ImmutableList<LogEntry> log;
 		private Player mrX;
 		private List<Player> detectives;
@@ -96,7 +96,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				if (locations.get(detective.location()) != null) throw new IllegalArgumentException();
 				locations.put(detective.location(), detective.piece().webColour());
 			}
-			Set<Move> movesToBeAdded = new HashSet<>();
 			Set<Move> mrXMoves = new HashSet<>();
 			Set<Move> detectiveMoves = new HashSet<>();
 			//get mrx single and double moves
@@ -119,10 +118,10 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			//TODO if mrX log book is full then mrx wins
 			//if none of the conditions above are met then carry on
 		 	if (winner.isEmpty()) {
-				movesToBeAdded.addAll(mrXMoves);
-				movesToBeAdded.addAll(detectiveMoves);
-				//updates the ACTUAL moves list
-				moves = ImmutableSet.copyOf(movesToBeAdded);
+				//updates the ACTUAL moves list with the moves of the remaining players
+				Set<Move> allMoves = new HashSet<>(mrXMoves);
+				allMoves.addAll(detectiveMoves);
+				moves = ImmutableSet.copyOf(getRemainingPlayersMoves(allMoves));
 			}
 
 			
@@ -306,6 +305,8 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 
 		//helper functions
+
+		//check if detective is on location
 		boolean detectiveOnLocation(int location, ImmutableList<Player> detectives) {
 			for (Player detective : detectives) {
 				if (detective.location() == location) return true;
@@ -313,6 +314,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			return false;
 		}
 
+		//return what a players ticket map would be after a singleMove (for use in finding second move)
 		Map<Ticket, Integer> modifyPlayerTickets(ImmutableMap<Ticket, Integer> playerTickets,
 												 ImmutableMap<Ticket, Integer> ticketChange) {
 			Map<Ticket, Integer> newTickets = new HashMap<>();
@@ -324,12 +326,24 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			return newTickets;
 		}
 
+		//combine two singleMoves into a double move
 		DoubleMove buildDoubleMove(SingleMove move1, SingleMove move2) {
 			DoubleMove doubleMove = new DoubleMove(move1.commencedBy(), move1.source(), move1.ticket, move1.destination,
 					move2.ticket, move2.destination);
 			return doubleMove;
 		}
-		
+
+		//gets the moves of the players who are in the remaining players set;
+		Set<Move> getRemainingPlayersMoves(Set<Move> allMoves) {
+			Set<Move> output = new HashSet<>();
+			for (Piece piece : remaining) {
+				for (Move move : allMoves) {
+					if (move.commencedBy() == piece) output.add(move);
+				}
+			}
+			return output;
+		}
+
 	};
 
 }
