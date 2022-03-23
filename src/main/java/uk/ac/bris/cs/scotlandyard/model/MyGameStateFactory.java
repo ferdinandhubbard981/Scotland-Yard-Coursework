@@ -55,10 +55,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			this.detectives = detectives;
 			this.winner = ImmutableSet.of();
 			this.moves = ImmutableSet.of();
-			//making list of all players for convenience
-//			List<Player> allPlayers = new ArrayList<>();
-//			allPlayers.addAll(detectives);
-//			allPlayers.add(mrX);
 
 			//checking for null inputs
 			if (mrX == null) throw new NullPointerException();
@@ -120,10 +116,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				allMoves.addAll(detectiveMoves);
 				moves = ImmutableSet.copyOf(getRemainingPlayersMoves(allMoves));
 			}
-
-
-			//implement initial moves getter here???
-
 		}
 
 		private Set<SingleMove> getSingleMoves(
@@ -136,8 +128,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			 *  - iterate through every edge, and filter each transport
 			 */
 			Set<SingleMove> playerMoves = new HashSet<>();
-
-			//implemented ticket filter
 
 			Set<Ticket> availableTickets = Stream.of(Ticket.values())
 					.filter(ticketType -> player.tickets().get(ticketType) > 0)
@@ -191,7 +181,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				Player hypotheticalPlayer = player.use(move1.ticket);
 				//getting second move
 				Set<SingleMove> secondMoveList = getSingleMoves(setup, detectives, hypotheticalPlayer, move1.destination);
-				// iterate through every possible second move
 				for (SingleMove move2 : secondMoveList) {
 					//build DoubleMove from two SingleMove
 					doubleMoves.add(buildDoubleMove(move1, move2));
@@ -203,13 +192,11 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public GameSetup getSetup() {
-			//implemented getSetup
 			return this.setup;
 		}
 
 		@Override
 		public ImmutableSet<Piece> getPlayers() {
-			//check getPlayersMatchesSupplied
 			return ImmutableSet.<Piece>builder()
 					.add(this.mrX.piece())
 					.addAll(this.detectives.stream()
@@ -230,7 +217,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public Optional<TicketBoard> getPlayerTickets(Piece piece) {
-			//check getPlayerTicketsForNonExistentPlayerIsEmpty
 			ImmutableList<Player> allPlayers = ImmutableList.<Player>builder()
 					.addAll(this.detectives)
 					.add(this.mrX)
@@ -241,33 +227,22 @@ public final class MyGameStateFactory implements Factory<GameState> {
 					.findFirst();
 
 			if (referencedPlayer.isEmpty()) return Optional.empty();
-			//END
-			//for valid players 
 			return Optional.of(new TicketBoard() {
 				@Override
 				public int getCount(Ticket ticket) {
 					return referencedPlayer.get().tickets().get(ticket);
 				}
 			});
-			//END
 		}
 
 		@Override
 		public ImmutableList<LogEntry> getMrXTravelLog() {
-			//implemented get log
 			return this.log;
 		}
 
 		@Override
 		public ImmutableSet<Piece> getWinner() {
 			return this.winner;
-
-			//Implement logic for checking if there is a winner in contructor or advance?
-
-			//check if any detective location == mrx location
-
-			//check if mrxs travel log count == max number of moves
-			// if (log.size() == setup.moves.size()) return new ImmutableSet<
 		}
 
 		@Override
@@ -277,7 +252,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 		@Override
 		public GameState advance(Move move) {
-			//added framework for advance??
 			if (!moves.contains(move)) throw new IllegalArgumentException("Illegal move: " + move);
 
 			if (move.commencedBy() == this.mrX.piece()) { //mrX played this move
