@@ -393,17 +393,17 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			return move.accept(new Move.Visitor<List<LogEntry>>() {
 				public List<LogEntry> visit(SingleMove singleMove) {
 					List<LogEntry> newLog = new ArrayList<>(log);
-					if (setup.moves.get(newLog.size()) == true) newLog.add(LogEntry.hidden(singleMove.ticket));
-					else newLog.add(LogEntry.reveal(singleMove.ticket, singleMove.source()));
+					if (setup.moves.get(newLog.size()) == false) newLog.add(LogEntry.hidden(singleMove.ticket));
+					else newLog.add(LogEntry.reveal(singleMove.ticket, singleMove.destination));
 					return newLog;
 				}
 
 				public List<LogEntry> visit(DoubleMove doubleMove) {
 					List<LogEntry> newLog = new ArrayList<>(log);
-					if (setup.moves.get(newLog.size()) == true) newLog.add(LogEntry.hidden(doubleMove.ticket1));
-					else newLog.add(LogEntry.reveal(doubleMove.ticket1, doubleMove.source()));
-					if (setup.moves.get(newLog.size()) == true) newLog.add(LogEntry.hidden(doubleMove.ticket2));
-					else newLog.add(LogEntry.reveal(doubleMove.ticket2, doubleMove.destination1));
+					if (setup.moves.get(newLog.size()) == false) newLog.add(LogEntry.hidden(doubleMove.ticket1));
+					else newLog.add(LogEntry.reveal(doubleMove.ticket1, doubleMove.destination1));
+					if (setup.moves.get(newLog.size()) == false) newLog.add(LogEntry.hidden(doubleMove.ticket2));
+					else newLog.add(LogEntry.reveal(doubleMove.ticket2, doubleMove.destination2));
 					return newLog;
 				}
 			});
