@@ -1,0 +1,22 @@
+class GameBoard<T> {
+    List<List<T>> 2dVector
+}
+
+ 
+machine learning algorithm:
+detective ai plays mrX ai many times until they git gud
+
+mrX
+neural network inputs parser:
+List<GameBoard<bool>> locations
+List<List<TicketCount>> tickets //count of each ticket of each player
+int mrXMovesLeft
+GameBoard<bool> possibleMoves
+GameBoard<TicketOneHotEncode> ticketRequiredForMove  
+
+neural network output:
+GameBoard<bool> outputMove
+
+reward function:
+win = good
+lose = bad
