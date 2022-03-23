@@ -40,12 +40,15 @@ public final class MyModelFactory implements Factory<Model> {
 		}
 
 		public void registerObserver(@Nonnull Observer observer) {
+			if (observerSet.contains(observer)) throw new IllegalArgumentException();
 			Set<Observer> newObserverSet = new HashSet<>(this.observerSet);
 			newObserverSet.add(observer);
 			this.observerSet = ImmutableSet.copyOf(newObserverSet);
 		}
 
 		public void unregisterObserver(@Nonnull Observer observer) {
+			if (observer == null) throw new NullPointerException();
+			if (!observerSet.contains(observer)) throw new IllegalArgumentException();
 			Set<Observer> newObserverSet = this.observerSet.stream()
 					.filter(obs -> obs != observer).collect(Collectors.toSet());
 			this.observerSet = ImmutableSet.copyOf(newObserverSet);
