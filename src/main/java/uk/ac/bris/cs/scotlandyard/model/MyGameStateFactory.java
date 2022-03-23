@@ -67,12 +67,15 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				if (det.has(Ticket.SECRET)) throw new IllegalArgumentException();
 			});
 
-			//check no duplicate detectives (colour)
+			//check no duplicate detectives (colour) & no overlapping
 			HashMap<String, Boolean> found = new HashMap<>();
-			for (int i = 0; i < detectives.size(); i++) {
-				String colour = detectives.get(i).piece().webColour();
-				if (found.containsKey(colour)) throw new IllegalArgumentException();
+			HashMap<Integer, String> locations = new HashMap<>();
+			for (Player detective : detectives) {
+				String colour = detective.piece().webColour();
+				if (found.containsKey(colour) || locations.get(detective.location()) != null)
+					throw new IllegalArgumentException();
 				found.put(colour, true);
+				locations.put(detective.location(), detective.piece().webColour());
 			}
 
 			//check empty graph
@@ -80,12 +83,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			//check empty moves
 			if (setup.moves.isEmpty()) throw new IllegalArgumentException();
 
-			//check detective location overlaps test: testLocationOverlapBetweenDetectivesShouldThrow
-			HashMap<Integer, String> locations = new HashMap<>();
-			for (Player detective : detectives) {
-				if (locations.get(detective.location()) != null) throw new IllegalArgumentException();
-				locations.put(detective.location(), detective.piece().webColour());
-			}
 			//get mrX moves
 			Set<Move> mrXMoves = getMoves(ImmutableList.of(mrX), detectives);
 			//get detective moves
