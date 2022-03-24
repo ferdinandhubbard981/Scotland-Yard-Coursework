@@ -117,7 +117,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			);
 		}
 
-		private Set<SingleMove> getSingleMoves(
+		private ImmutableSet<SingleMove> getSingleMoves(
 				GameSetup setup,
 				ImmutableList<Player> detectives,
 				Player player,
@@ -126,7 +126,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			//checking if source node exists
 			if (!setup.graph.nodes().contains(source)) throw new IllegalArgumentException();
 
-			Set<SingleMove> playerMoves = new HashSet<>();
+			ImmutableSet.Builder<SingleMove> playerMoves = ImmutableSet.builder();
 
 			Set<Ticket> availableTickets = Stream.of(Ticket.values())
 					.filter(ticketType -> player.tickets().get(ticketType) > 0)
@@ -151,36 +151,32 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				if (availableTickets.contains(Ticket.SECRET))
 					playerMoves.add(new SingleMove(player.piece(), source, Ticket.SECRET, destination));
 			}
-			return playerMoves;
+			return playerMoves.build();
 		}
 
-		Set<DoubleMove> getDoubleMoves(
+		private ImmutableSet<DoubleMove> getDoubleMoves(
 				GameSetup setup,
 				ImmutableList<Player> detectives,
 				Player player,
 				int source) {
-			//declare variables
-			Set<DoubleMove> doubleMoves = new HashSet<>();
-			//get single moves
-			ImmutableSet<SingleMove> firstMoveList = ImmutableSet.copyOf(getSingleMoves(setup, detectives, player, source));
-			// check if contains x2 ticket
-			if (player.tickets().get(Ticket.DOUBLE) == 0) return doubleMoves;
+			ImmutableSet.Builder<DoubleMove> doubleMoves = ImmutableSet.builder();
+			// check if contains x2 ticket and has enough logbook space
+			if (player.tickets().get(Ticket.DOUBLE) == 0 || log.size() + 2 > setup.moves.size())
+				return doubleMoves.build();
 
-			//check if mrX has enough space in his travel log for double move
-			if (log.size() + 2 > setup.moves.size()) return doubleMoves;
+			//get single moves
+			ImmutableSet<SingleMove> firstMoveList = getSingleMoves(setup, detectives, player, source);
 
 			//iterate through every possible first move
 			for (SingleMove move1 : firstMoveList) {
 				//making hypothetical player that has used a ticket in order to find second move
 				Player hypotheticalPlayer = player.use(move1.ticket);
-				//getting second move
-				Set<SingleMove> secondMoveList = getSingleMoves(setup, detectives, hypotheticalPlayer, move1.destination);
-				for (SingleMove move2 : secondMoveList) {
-					//build DoubleMove from two SingleMove
-					doubleMoves.add(buildDoubleMove(move1, move2));
-				}
+				//getting second move & building DoubleMove from 2 SingleMoves
+				getSingleMoves(setup, detectives, hypotheticalPlayer, move1.destination)
+						.stream()
+						.forEach(move2 -> doubleMoves.add(buildDoubleMove(move1, move2)));
 			}
-			return doubleMoves;
+			return doubleMoves.build();
 		}
 
 
