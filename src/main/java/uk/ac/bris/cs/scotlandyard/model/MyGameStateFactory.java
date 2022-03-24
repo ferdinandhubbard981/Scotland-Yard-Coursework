@@ -193,7 +193,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 							.map(detective -> detective.piece())
 							.collect(Collectors.toList()))
 					.build();
-			//END
 		}
 
 		@Override
@@ -217,12 +216,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 					.findFirst();
 
 			if (referencedPlayer.isEmpty()) return Optional.empty();
-			return Optional.of(new TicketBoard() {
-				@Override
-				public int getCount(Ticket ticket) {
-					return referencedPlayer.get().tickets().get(ticket);
-				}
-			});
+			return Optional.of(ticket -> referencedPlayer.get().tickets().get(ticket));
 		}
 
 		@Override
