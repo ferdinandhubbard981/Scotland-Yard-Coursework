@@ -255,33 +255,40 @@ public final class MyGameStateFactory implements Factory<GameState> {
 						ImmutableList.copyOf(detectives)
 				);
 			}
-				//finding detective who made the move
-				int index = this.detectives.indexOf(this.detectives.stream().filter(det -> det.piece() == move.commencedBy()).findFirst().get());
-				Player detective = this.detectives.get(index);
-//				Player detective = detectives.stream().filter(det -> det.piece() == move.commencedBy()).findFirst().get();
-				//move detective to move.destination
-				detective = detective.at(getMoveDestination(move));
-				//take used ticket from detective and give to mrX
-				detective = detective.use(move.tickets());
-				mrX = mrX.give(getSingleMoveTicket(move));
-				//lambda expression needs value to be final
-				final Player finalDetective = detective;
-				//Ensure that particular detective won't move again this round (remove from remaining players)
-				Set<Piece> newRemainingPlayers = this.remaining.stream().filter(det -> det != finalDetective.piece())
-						.collect(Collectors.toSet());
-				//lambda expression needs value to be final
-				ImmutableSet<Piece> immutableNewRemainingPlayers = ImmutableSet.copyOf(newRemainingPlayers);
-				//getting newRemainingPlayers in the form of ImmutableList<Player> for checking of moves afterwards
-				ImmutableList<Player> remainingDetectives = ImmutableList.copyOf(detectives.stream()
-						.filter(det -> immutableNewRemainingPlayers.contains(det.piece()))
-						.toList());
-				//if remaining detectives have no more moves to play then swap to mrX turn (update remaining variable)
-				if (getMoves(remainingDetectives, detectives).isEmpty()) newRemainingPlayers = Set.of(this.mrX.piece());
-				if (this.setup.moves.size() == this.log.size()) newRemainingPlayers = Set.of();
-				//TODO error detective is not referencing the detective in the list detectives
-				List<Player> mutableDetectives = new ArrayList<>(this.detectives);
-				mutableDetectives.set(index, detective);
-				return new MyGameState(this.setup, ImmutableSet.copyOf(newRemainingPlayers), this.log, this.mrX, ImmutableList.copyOf(mutableDetectives));
+			//finding detective who made the move
+			Player detective = this.detectives.stream()
+					.filter(det -> det.piece() == move.commencedBy())
+					.findFirst().get();
+			int index = this.detectives.indexOf(detective);
+			//move detective to destination & give ticket to mrX
+			detective = detective.at(getMoveDestination(move)).use(move.tickets());
+			mrX = mrX.give(getSingleMoveTicket(move));
+
+			//lambda expression needs value to be final
+			final Player finalDetective = detective;
+			//Ensure that particular detective won't move again this round (remove from remaining players)
+			Set<Piece> newRemainingPlayers = this.remaining.stream()
+					.filter(det -> det != finalDetective.piece())
+					.collect(Collectors.toSet());
+
+			//getting newRemainingPlayers in the form of ImmutableList<Player> for checking of moves afterwards
+			Set<Piece> finalNewRemainingPlayers = newRemainingPlayers;
+			ImmutableList<Player> remainingDetectives = ImmutableList.copyOf(detectives.stream()
+					.filter(det -> finalNewRemainingPlayers.contains(det.piece()))
+					.toList());
+			//if remaining detectives have no more moves to play then swap to mrX turn (update remaining variable)
+			if (getMoves(remainingDetectives, detectives).isEmpty())
+				newRemainingPlayers = Set.of(this.mrX.piece());
+			if (this.setup.moves.size() == this.log.size())
+				newRemainingPlayers = Set.of();
+
+			List<Player> mutableDetectives = new ArrayList<>(this.detectives);
+			mutableDetectives.set(index, detective);
+			return new MyGameState(this.setup,
+					ImmutableSet.copyOf(newRemainingPlayers),
+					this.log, this.mrX,
+					ImmutableList.copyOf(mutableDetectives)
+			);
 		}
 
 
