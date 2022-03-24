@@ -238,7 +238,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		public GameState advance(Move move) {
 			if (!moves.contains(move)) throw new IllegalArgumentException("Illegal move: " + move);
 
-			if (move.commencedBy() == this.mrX.piece()) { //mrX played this move
+			if (move.commencedBy() == this.mrX.piece()) {
 				//add move to log (checking if setup.move is hidden or not)
 				List<LogEntry> newLog = getNewLog(move, this.setup, this.log);
 				//take used tickets away from mrX
@@ -247,13 +247,14 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				this.mrX = this.mrX.at(getMoveDestination(move));
 				//swap to the detectives turn (update the remaining variable)
 				//mrX plays first therefore all the detectives have yet to play their turn
-				//we don't need to check that at least 1 detective has at least 1 move here
-				//because we check for that in win conditions
-				ImmutableSet<Piece> newRemainingPlayers = ImmutableSet.copyOf(this.detectives.stream().map(det -> det.piece()).collect(Collectors.toSet()));
-				//return gamesState
-				return new MyGameState(this.setup, newRemainingPlayers, ImmutableList.copyOf(newLog), this.mrX, ImmutableList.copyOf(detectives));
-
-			} else {
+				ImmutableSet<Piece> newRemainingPlayers = getDetectivesAsImmutableSet();
+				return new MyGameState(this.setup,
+						newRemainingPlayers,
+						ImmutableList.copyOf(newLog),
+						this.mrX,
+						ImmutableList.copyOf(detectives)
+				);
+			}
 				//finding detective who made the move
 				int index = this.detectives.indexOf(this.detectives.stream().filter(det -> det.piece() == move.commencedBy()).findFirst().get());
 				Player detective = this.detectives.get(index);
@@ -281,8 +282,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				List<Player> mutableDetectives = new ArrayList<>(this.detectives);
 				mutableDetectives.set(index, detective);
 				return new MyGameState(this.setup, ImmutableSet.copyOf(newRemainingPlayers), this.log, this.mrX, ImmutableList.copyOf(mutableDetectives));
-
-			}
 		}
 
 
