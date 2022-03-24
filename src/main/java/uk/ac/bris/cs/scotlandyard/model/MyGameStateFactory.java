@@ -110,7 +110,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			}
 		}
 		private ImmutableSet<Piece> getDetectivesAsImmutableSet(){
-			return ImmutableSet.copyOf(this.detectives.asList()
+			return ImmutableSet.copyOf(this.detectives
 					.stream()
 					.map(detective -> detective.piece())
 					.collect(Collectors.toUnmodifiableSet())
