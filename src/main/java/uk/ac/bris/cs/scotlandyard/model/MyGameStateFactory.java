@@ -83,9 +83,8 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			//check empty moves
 			if (setup.moves.isEmpty()) throw new IllegalArgumentException();
 
-			//get mrX moves
+			//get mrX & detective moves
 			Set<Move> mrXMoves = getMoves(ImmutableList.of(mrX), detectives);
-			//get detective moves
 			Set<Move> detectiveMoves = getMoves(detectives, detectives);
 
 			//if mrX is surrounded by detectives then detectives win aka mrX has no moves left
@@ -98,13 +97,10 @@ public final class MyGameStateFactory implements Factory<GameState> {
 					break;
 				}
 			}
-			//if detectives have no moves left then mrX wins
-			if (detectiveMoves.isEmpty()) this.winner = ImmutableSet.of(mrX.piece());
-			//if mrX log book is full then mrx wins
-			if (log.size() == setup.moves.size() && remaining.isEmpty()) {
+			//if detectives have no moves left or logbook full then mrX wins
+			if (detectiveMoves.isEmpty() || (log.size() == setup.moves.size() && remaining.isEmpty()))
 				this.winner = ImmutableSet.of(mrX.piece());
-				int temp = 5;
-			}
+
 			//if none of the conditions above are met then carry on
 			if (this.winner.isEmpty()) {
 				//updates the ACTUAL moves list with the moves of the remaining players
