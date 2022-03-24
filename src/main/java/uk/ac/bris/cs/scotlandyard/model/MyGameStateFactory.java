@@ -312,8 +312,8 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		//gets the moves of the players who are in the remaining players set;
 		Set<Move> getRemainingPlayersMoves(Set<Move> allMoves) {
 			Set<Move> output = new HashSet<>();
-			for (Piece piece : this.remaining) {
-				for (Move move : allMoves) {
+			for (Move move : allMoves) {
+				for (Piece piece : this.remaining) {
 					if (move.commencedBy() == piece) output.add(move);
 				}
 			}
@@ -326,23 +326,13 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			for (Player player : players) {
 				playerMoves.addAll(getSingleMoves(this.setup, ImmutableList.copyOf(detectives), player, player.location()));
 				playerMoves.addAll(getDoubleMoves(this.setup, ImmutableList.copyOf(detectives), player, player.location()));
-
 			}
-			return playerMoves;
-		}
-
-		//find all moves for player
-		Set<Move> getMoves(Player player, List<Player> detectives) {
-			Set<Move> playerMoves = new HashSet<>();
-			playerMoves.addAll(getSingleMoves(setup, ImmutableList.copyOf(detectives), player, player.location()));
-			playerMoves.addAll(getDoubleMoves(setup, ImmutableList.copyOf(detectives), player, player.location()));
 			return playerMoves;
 		}
 
 		//visitor functions
 		int getMoveDestination(Move move) {
 			return move.accept(new Move.Visitor<Integer>() {
-
 				public Integer visit(SingleMove singleMove) {
 					return singleMove.destination;
 				}
@@ -354,19 +344,19 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		}
 
 		List<LogEntry> getNewLog(Move move, GameSetup setup, List<LogEntry> log) {
-			return move.accept(new Move.Visitor<List<LogEntry>>() {
+			return move.accept(new Move.Visitor<>() {
 				public List<LogEntry> visit(SingleMove singleMove) {
 					List<LogEntry> newLog = new ArrayList<>(log);
-					if (setup.moves.get(newLog.size()) == false) newLog.add(LogEntry.hidden(singleMove.ticket));
+					if (!setup.moves.get(newLog.size())) newLog.add(LogEntry.hidden(singleMove.ticket));
 					else newLog.add(LogEntry.reveal(singleMove.ticket, singleMove.destination));
 					return newLog;
 				}
 
 				public List<LogEntry> visit(DoubleMove doubleMove) {
 					List<LogEntry> newLog = new ArrayList<>(log);
-					if (setup.moves.get(newLog.size()) == false) newLog.add(LogEntry.hidden(doubleMove.ticket1));
+					if (!setup.moves.get(newLog.size())) newLog.add(LogEntry.hidden(doubleMove.ticket1));
 					else newLog.add(LogEntry.reveal(doubleMove.ticket1, doubleMove.destination1));
-					if (setup.moves.get(newLog.size()) == false) newLog.add(LogEntry.hidden(doubleMove.ticket2));
+					if (!setup.moves.get(newLog.size())) newLog.add(LogEntry.hidden(doubleMove.ticket2));
 					else newLog.add(LogEntry.reveal(doubleMove.ticket2, doubleMove.destination2));
 					return newLog;
 				}
@@ -374,8 +364,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		}
 
 		Ticket getSingleMoveTicket(Move move) {
-			return move.accept(new Visitor<Ticket>() {
-
+			return move.accept(new Visitor<>() {
 				public Ticket visit(SingleMove singleMove) {
 					return singleMove.ticket;
 				}
@@ -383,9 +372,7 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				public Ticket visit(DoubleMove doubleMove) {
 					throw new IllegalArgumentException("getSingleMoveTicket was called with double move");
 				}
-
 			});
 		}
 	};
-
 }
