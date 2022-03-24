@@ -90,15 +90,14 @@ public final class MyGameStateFactory implements Factory<GameState> {
 
 			//if mrX is surrounded by detectives then detectives win aka mrX has no moves left
 			if (mrXMoves.isEmpty() && remaining.contains(mrX.piece()))
-				this.winner = ImmutableSet.copyOf(detectives.asList().stream().map(det -> det.piece()).collect(Collectors.toUnmodifiableSet()));
+				this.winner = getDetectivesAsImmutableSet();
 			//if a detective is on the same square than mrX then the detectives win
 			for (Player detective : detectives) {
 				if (mrX.location() == detective.location()) {
-					this.winner = ImmutableSet.copyOf(detectives.asList().stream().map(det -> det.piece()).collect(Collectors.toUnmodifiableSet()));
+					this.winner = getDetectivesAsImmutableSet();
 					break;
 				}
 			}
-
 			//if detectives have no moves left then mrX wins
 			if (detectiveMoves.isEmpty()) this.winner = ImmutableSet.of(mrX.piece());
 			//if mrX log book is full then mrx wins
@@ -113,6 +112,13 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				allMoves.addAll(detectiveMoves);
 				moves = ImmutableSet.copyOf(getRemainingPlayersMoves(allMoves));
 			}
+		}
+		private ImmutableSet<Piece> getDetectivesAsImmutableSet(){
+			return ImmutableSet.copyOf(this.detectives.asList()
+					.stream()
+					.map(detective -> detective.piece())
+					.collect(Collectors.toUnmodifiableSet())
+			);
 		}
 
 		private Set<SingleMove> getSingleMoves(
