@@ -13,7 +13,6 @@ import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
 import uk.ac.bris.cs.scotlandyard.model.Piece.Detective;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Factory;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
-import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Transport;
 import uk.ac.bris.cs.scotlandyard.model.Move.*;
 
 //TODO encapsulate all large blocks of code into many small helper functions with meaningful names for clarity
@@ -117,6 +116,10 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			);
 		}
 
+		/**
+		 * @implNote iterates over transport methods of "source" and returns available moves given tickets.
+		 * @apiNote used for both mrX and detectives
+		 */
 		private ImmutableSet<SingleMove> getSingleMoves(
 				GameSetup setup,
 				ImmutableList<Player> detectives,
@@ -154,6 +157,10 @@ public final class MyGameStateFactory implements Factory<GameState> {
 			return playerMoves.build();
 		}
 
+		/**
+		 * @implNote calls & iterates through getSingleMoves, then calls again to find double moves
+		 * @apiNote used for mrX only
+		 */
 		private ImmutableSet<DoubleMove> getDoubleMoves(
 				GameSetup setup,
 				ImmutableList<Player> detectives,
@@ -198,7 +205,6 @@ public final class MyGameStateFactory implements Factory<GameState> {
 		@Override
 		public Optional<Integer> getDetectiveLocation(Detective detective) {
 			String colour = detective.webColour();
-			//find detective in list with matching colour
 			return detectives.stream()
 					.filter(x -> x.piece().webColour() == colour)
 					.map(x -> x.location()).findFirst();
