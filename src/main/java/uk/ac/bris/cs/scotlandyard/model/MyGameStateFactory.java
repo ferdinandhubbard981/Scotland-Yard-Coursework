@@ -122,40 +122,35 @@ public final class MyGameStateFactory implements Factory<GameState> {
 				ImmutableList<Player> detectives,
 				Player player,
 				int source) {
-			/*
-			 * for a given player, return a set of possible moves it can do
-			 *  - iterate through every edge, and filter each transport
-			 */
+
+			//checking if source node exists
+			if (!setup.graph.nodes().contains(source)) throw new IllegalArgumentException();
+
 			Set<SingleMove> playerMoves = new HashSet<>();
 
 			Set<Ticket> availableTickets = Stream.of(Ticket.values())
 					.filter(ticketType -> player.tickets().get(ticketType) > 0)
 					.collect(Collectors.toSet());
 
-			//checking if source node exists
-			if (!setup.graph.nodes().contains(source)) throw new IllegalArgumentException();
-
-			//iterating through all adjacent nodes
 			for (int destination : setup.graph.adjacentNodes(source)) {
 				//check if detective is on destination node
 				if (detectiveOnLocation(destination, detectives)) continue;
-				//gets stream of transport methods associated with current edge
-				List<Transport> transportMethods = setup.graph.edgeValueOrDefault(source, destination, ImmutableSet.of())
-						.asList().stream()
-						//removes transport methods for which player doesn't have a ticket
+				//gets all transport methods a player can use given their tickets, and adds to playerMoves
+				setup.graph
+						.edgeValueOrDefault(source, destination, ImmutableSet.of())
+						.stream()
 						.filter(transportMethod -> availableTickets.contains(transportMethod.requiredTicket()))
-						.toList();
-
-				for (Transport transportMethod : transportMethods) {
-					//add move to the list
-					playerMoves.add(new SingleMove(player.piece(), source, transportMethod.requiredTicket(), destination));
-				}
+						.forEach(transportMethod -> playerMoves
+								.add(new SingleMove(
+										player.piece(),
+										source,
+										transportMethod.requiredTicket(),
+										destination
+								)));
 				//if player has a secret ticket then add move using secret ticket
 				if (availableTickets.contains(Ticket.SECRET))
 					playerMoves.add(new SingleMove(player.piece(), source, Ticket.SECRET, destination));
-
 			}
-
 			return playerMoves;
 		}
 
